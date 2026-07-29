@@ -12,40 +12,43 @@
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #1A1A1A 0%, #2D2D2D 100%);
+            font-family: 'Arial', sans-serif;
+            background: #1A1A1A;
             color: #fff;
             padding: 20px;
             min-height: 100vh;
         }
 
         .container {
-            max-width: 900px;
+            max-width: 1200px;
             margin: 0 auto;
         }
 
         header {
             text-align: center;
             margin-bottom: 40px;
+            border-bottom: 3px solid #FF5722;
+            padding-bottom: 20px;
         }
 
         h1 {
             font-size: 2.5em;
             color: #FF5722;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
-            margin-bottom: 10px;
+            margin-bottom: 5px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 2px;
         }
 
         .subtitle {
-            font-size: 1.2em;
+            font-size: 1.1em;
             color: #CCC;
-            margin-bottom: 20px;
+            margin-bottom: 10px;
         }
 
         .last-update {
             font-size: 0.9em;
             color: #00FF00;
-            margin-top: 10px;
             font-weight: bold;
         }
 
@@ -53,7 +56,7 @@
             display: flex;
             justify-content: center;
             gap: 15px;
-            margin-bottom: 40px;
+            margin-bottom: 30px;
             flex-wrap: wrap;
             align-items: center;
         }
@@ -61,169 +64,214 @@
         .control-label {
             color: #FF5722;
             font-weight: bold;
-            font-size: 1.1em;
+            font-size: 1em;
+            text-transform: uppercase;
         }
 
         select {
-            padding: 12px 20px;
-            font-size: 1em;
+            padding: 10px 15px;
+            font-size: 0.95em;
             border: 2px solid #FF5722;
-            background: #1A1A1A;
+            background: #2D2D2D;
             color: #FF5722;
-            border-radius: 5px;
+            border-radius: 3px;
             cursor: pointer;
-            min-width: 250px;
+            min-width: 200px;
             font-weight: bold;
-            transition: all 0.3s ease;
         }
 
         select:hover {
-            background: #2D2D2D;
-            box-shadow: 0 0 10px rgba(255, 87, 34, 0.3);
+            background: #3D3D3D;
         }
 
         select:focus {
             outline: none;
-            box-shadow: 0 0 15px rgba(255, 87, 34, 0.5);
+            box-shadow: 0 0 10px rgba(255, 87, 34, 0.5);
         }
 
         select option {
-            background: #1A1A1A;
+            background: #2D2D2D;
             color: #FF5722;
         }
 
-        .ranking-container {
-            background: rgba(255, 87, 34, 0.1);
+        .table-container {
+            background: #2D2D2D;
             border: 2px solid #FF5722;
-            border-radius: 10px;
-            padding: 30px;
-            box-shadow: 0 5px 15px rgba(255, 87, 34, 0.2);
-            min-height: 400px;
+            border-radius: 3px;
+            overflow: hidden;
+            margin-bottom: 30px;
         }
 
-        .category-title {
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
             background: #FF5722;
             color: #fff;
-            padding: 15px;
-            border-radius: 5px;
+            text-transform: uppercase;
             font-weight: bold;
-            font-size: 1.3em;
-            margin-bottom: 25px;
+            font-size: 0.9em;
+            letter-spacing: 1px;
+        }
+
+        th {
+            padding: 15px;
+            text-align: left;
+            border-right: 1px solid #fff;
+        }
+
+        th:last-child {
+            border-right: none;
+        }
+
+        tbody tr {
+            border-bottom: 1px solid #444;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        tbody tr:hover {
+            background-color: rgba(255, 87, 34, 0.15);
+        }
+
+        tbody tr.expanded {
+            background-color: rgba(255, 87, 34, 0.25);
+        }
+
+        td {
+            padding: 15px;
+            border-right: 1px solid #444;
+        }
+
+        td:last-child {
+            border-right: none;
+        }
+
+        .rank {
+            font-weight: bold;
+            font-size: 1.2em;
+            color: #FF5722;
             text-align: center;
         }
 
-        .ranking-item {
-            display: flex;
-            align-items: center;
-            padding: 15px;
-            margin-bottom: 12px;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 5px;
-            border-left: 5px solid #FF5722;
-            transition: all 0.3s ease;
+        .rank.first {
+            font-size: 1.4em;
+            color: #FFD700;
         }
 
-        .ranking-item:hover {
-            background: rgba(255, 87, 34, 0.2);
-            transform: translateX(5px);
+        .rank.second {
+            color: #C0C0C0;
         }
 
-        .position {
-            font-size: 1.8em;
-            font-weight: bold;
-            min-width: 60px;
-            text-align: center;
-            margin-right: 20px;
+        .rank.third {
+            color: #CD7F32;
         }
 
         .medal {
-            font-size: 2em;
-            margin-right: 10px;
-        }
-
-        .team-info {
-            flex: 1;
+            display: inline-block;
+            margin-right: 8px;
+            font-size: 1.1em;
         }
 
         .team-name {
             font-weight: bold;
-            font-size: 1.1em;
-            margin-bottom: 5px;
+            font-size: 1em;
             color: #FFF;
         }
 
-        .team-time {
-            font-size: 0.95em;
+        .category {
             color: #FF5722;
+            font-size: 0.9em;
+            margin-top: 3px;
+        }
+
+        .time {
             font-weight: bold;
+            font-size: 1em;
+            color: #00FF00;
+            text-align: center;
+        }
+
+        .points {
+            font-weight: bold;
+            font-size: 1.1em;
+            color: #FFD700;
+            text-align: center;
+        }
+
+        .expand-icon {
+            color: #FF5722;
+            font-size: 1.2em;
+        }
+
+        .details-row {
+            display: none;
+            background-color: rgba(255, 87, 34, 0.1);
+        }
+
+        .details-row.show {
+            display: table-row;
+        }
+
+        .details-content {
+            padding: 20px;
+            text-align: center;
+        }
+
+        .athletes {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 15px;
+        }
+
+        .athlete {
+            background: rgba(255, 87, 34, 0.2);
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 3px solid #FF5722;
+        }
+
+        .athlete-label {
+            font-size: 0.8em;
+            color: #999;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+
+        .athlete-name {
+            font-weight: bold;
+            font-size: 1.1em;
+            color: #FFF;
         }
 
         .no-data {
             text-align: center;
+            padding: 40px 20px;
             color: #999;
-            padding: 60px 20px;
-            font-style: italic;
-            font-size: 1.1em;
-        }
-
-        .loading {
-            text-align: center;
-            padding: 60px 20px;
-            color: #FF5722;
             font-size: 1.1em;
         }
 
         .refresh-info {
             text-align: center;
             color: #999;
-            margin-top: 40px;
             font-size: 0.9em;
-        }
-
-        .podium {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            gap: 20px;
-            margin-bottom: 30px;
-            align-items: flex-end;
-        }
-
-        .podium-item {
-            text-align: center;
-            padding: 20px;
-            background: rgba(255, 87, 34, 0.1);
-            border-radius: 10px;
-            border: 2px solid #FF5722;
-        }
-
-        .podium-medal {
-            font-size: 3em;
-            margin-bottom: 10px;
-        }
-
-        .podium-name {
-            font-weight: bold;
-            font-size: 0.95em;
-            margin-bottom: 5px;
-            word-break: break-word;
-        }
-
-        .podium-time {
-            color: #FF5722;
-            font-weight: bold;
-            font-size: 0.9em;
-        }
-
-        .podium-position {
-            font-size: 1.2em;
-            color: #FF5722;
-            margin-top: 10px;
-            font-weight: bold;
+            margin-top: 20px;
         }
 
         @media (max-width: 768px) {
             h1 {
                 font-size: 1.8em;
+            }
+
+            table {
+                font-size: 0.85em;
+            }
+
+            th, td {
+                padding: 10px;
             }
 
             .controls {
@@ -234,27 +282,9 @@
                 min-width: 100%;
             }
 
-            .podium {
+            .athletes {
                 grid-template-columns: 1fr;
-                align-items: center;
             }
-
-            .ranking-container {
-                padding: 20px;
-            }
-        }
-
-        .gold { color: #FFD700; }
-        .silver { color: #C0C0C0; }
-        .bronze { color: #CD7F32; }
-
-        .pulse {
-            animation: pulse 1s infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
         }
     </style>
 </head>
@@ -267,23 +297,35 @@
         </header>
 
         <div class="controls">
-            <label class="control-label">Selecione a Categoria:</label>
+            <label class="control-label">Categoria:</label>
             <select id="categorySelect" onchange="updateDisplay()">
-                <option value="">-- Escolha uma categoria --</option>
+                <option value="">-- Todas as Categorias --</option>
             </select>
         </div>
 
-        <div class="ranking-container">
-            <div id="categoryTitle" class="category-title">Escolha uma categoria acima</div>
-            
-            <div id="podium" class="podium"></div>
-            
-            <div id="rankingList"></div>
+        <div class="table-container">
+            <table id="rankingTable">
+                <thead>
+                    <tr>
+                        <th style="width: 8%;">Rank</th>
+                        <th style="width: 30%;">Equipe</th>
+                        <th style="width: 25%;">Categoria</th>
+                        <th style="width: 20%;">Tempo</th>
+                        <th style="width: 12%;">Pontos</th>
+                        <th style="width: 5%; text-align: center;">+</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                </tbody>
+            </table>
+
+            <div id="noData" class="no-data" style="display:none;">
+                📋 Nenhum resultado finalizado ainda
+            </div>
         </div>
 
         <div class="refresh-info">
-            🔄 Atualiza automaticamente a cada 30 segundos<br>
-            📊 Dados originários de Google Sheets
+            🔄 Atualiza automaticamente a cada 30 segundos
         </div>
     </div>
 
@@ -304,6 +346,7 @@
         ];
 
         let allData = [];
+        let expandedRow = null;
 
         // Converter tempo MM:SS em segundos para ordenar
         function timeToSeconds(timeStr) {
@@ -312,6 +355,14 @@
             const minutes = parseInt(parts[0]) || 0;
             const seconds = parseInt(parts[1]) || 0;
             return minutes * 60 + seconds;
+        }
+
+        // Calcular pontos (100, 95, 90, 85...)
+        function calculatePoints(position) {
+            if (position === 1) return 100;
+            if (position === 2) return 95;
+            if (position === 3) return 90;
+            return Math.max(0, 100 - (position - 1) * 5);
         }
 
         // Buscar dados via CSV
@@ -334,7 +385,9 @@
                             equipe: parts[1].trim(),
                             categoria: parts[2].trim(),
                             tempo: parts[3].trim(),
-                            status: parts[4] ? parts[4].trim() : ''
+                            status: parts[4] ? parts[4].trim() : '',
+                            atleta1: parts[5] ? parts[5].trim() : 'N/A',
+                            atleta2: parts[6] ? parts[6].trim() : 'N/A'
                         });
                     }
                 }
@@ -351,6 +404,7 @@
         // Preencher dropdown com categorias
         function populateDropdown() {
             const select = document.getElementById('categorySelect');
+            const currentValue = select.value;
             
             // Limpar opções antigas (manter a primeira)
             while (select.options.length > 1) {
@@ -374,6 +428,9 @@
                     select.appendChild(option);
                 }
             });
+
+            // Restaurar valor anterior
+            select.value = currentValue;
         }
 
         // Atualizar display
@@ -381,81 +438,117 @@
             const categorySelect = document.getElementById('categorySelect');
             const selectedCategory = categorySelect.value;
 
-            if (!selectedCategory) {
-                document.getElementById('categoryTitle').textContent = 'Escolha uma categoria acima';
-                document.getElementById('podium').innerHTML = '';
-                document.getElementById('rankingList').innerHTML = '';
+            let categoryData = allData.filter(row => row.status === "Finalizado");
+
+            if (selectedCategory) {
+                categoryData = categoryData.filter(row => row.categoria === selectedCategory);
+            }
+
+            // Ordenar por tempo
+            categoryData.sort((a, b) => timeToSeconds(a.tempo) - timeToSeconds(b.tempo));
+
+            // Renderizar tabela
+            const tableBody = document.getElementById('tableBody');
+            const noData = document.getElementById('noData');
+
+            if (categoryData.length === 0) {
+                tableBody.innerHTML = '';
+                noData.style.display = 'block';
                 return;
             }
 
-            const categoryData = allData
-                .filter(row => row.categoria === selectedCategory && row.status === "Finalizado")
-                .sort((a, b) => timeToSeconds(a.tempo) - timeToSeconds(b.tempo));
+            noData.style.display = 'none';
+            tableBody.innerHTML = '';
 
-            document.getElementById('categoryTitle').textContent = selectedCategory;
+            categoryData.forEach((row, index) => {
+                const position = index + 1;
+                const points = calculatePoints(position);
+                let medal = '';
+                let rankClass = '';
 
-            // Mostrar pódio (3 primeiros)
-            if (categoryData.length >= 1) {
-                let podiumHTML = '';
-                
-                for (let i = 0; i < Math.min(3, categoryData.length); i++) {
-                    const row = categoryData[i];
-                    let medal = '';
-                    let medalClass = '';
-                    let position = '';
-
-                    if (i === 0) {
-                        medal = '🥇';
-                        medalClass = 'gold';
-                        position = '1º LUGAR';
-                    } else if (i === 1) {
-                        medal = '🥈';
-                        medalClass = 'silver';
-                        position = '2º LUGAR';
-                    } else if (i === 2) {
-                        medal = '🥉';
-                        medalClass = 'bronze';
-                        position = '3º LUGAR';
-                    }
-
-                    podiumHTML += `
-                        <div class="podium-item">
-                            <div class="podium-medal">${medal}</div>
-                            <div class="podium-name">${row.equipe}</div>
-                            <div class="podium-time">⏱️ ${row.tempo}</div>
-                            <div class="podium-position ${medalClass}">${position}</div>
-                        </div>
-                    `;
+                if (position === 1) {
+                    medal = '🥇';
+                    rankClass = 'first';
+                } else if (position === 2) {
+                    medal = '🥈';
+                    rankClass = 'second';
+                } else if (position === 3) {
+                    medal = '🥉';
+                    rankClass = 'third';
                 }
 
-                document.getElementById('podium').innerHTML = podiumHTML;
-            } else {
-                document.getElementById('podium').innerHTML = '';
-            }
+                const mainRow = document.createElement('tr');
+                mainRow.innerHTML = `
+                    <td class="rank ${rankClass}">
+                        <span class="medal">${medal}</span>${position}
+                    </td>
+                    <td>
+                        <div class="team-name">${row.equipe}</div>
+                        <div class="category">${row.categoria}</div>
+                    </td>
+                    <td>
+                        <div class="category">${row.categoria}</div>
+                    </td>
+                    <td class="time">⏱️ ${row.tempo}</td>
+                    <td class="points">${points}</td>
+                    <td style="text-align: center;">
+                        <span class="expand-icon" onclick="toggleDetails(event, this)">▼</span>
+                    </td>
+                `;
 
-            // Mostrar ranking completo (a partir do 4º)
-            let rankingHTML = '';
+                mainRow.onclick = (e) => {
+                    if (e.target.classList.contains('expand-icon')) return;
+                    toggleDetails(e, mainRow.querySelector('.expand-icon'));
+                };
 
-            if (categoryData.length > 3) {
-                for (let i = 3; i < categoryData.length; i++) {
-                    const row = categoryData[i];
-                    const position = i + 1;
+                tableBody.appendChild(mainRow);
 
-                    rankingHTML += `
-                        <div class="ranking-item">
-                            <div class="position">${position}º</div>
-                            <div class="team-info">
-                                <div class="team-name">${row.equipe}</div>
-                                <div class="team-time">⏱️ ${row.tempo}</div>
+                // Linha de detalhes
+                const detailsRow = document.createElement('tr');
+                detailsRow.className = 'details-row';
+                detailsRow.innerHTML = `
+                    <td colspan="6">
+                        <div class="details-content">
+                            <div class="athletes">
+                                <div class="athlete">
+                                    <div class="athlete-label">Atleta 1</div>
+                                    <div class="athlete-name">${row.atleta1}</div>
+                                </div>
+                                <div class="athlete">
+                                    <div class="athlete-label">Atleta 2</div>
+                                    <div class="athlete-name">${row.atleta2}</div>
+                                </div>
                             </div>
                         </div>
-                    `;
-                }
-            } else if (categoryData.length === 0) {
-                rankingHTML = '<div class="no-data">Sem dados ainda nesta categoria</div>';
+                    </td>
+                `;
+
+                tableBody.appendChild(detailsRow);
+                mainRow.detailsRow = detailsRow;
+            });
+        }
+
+        // Toggle detalhes
+        function toggleDetails(event, icon) {
+            const row = event.currentTarget || icon.closest('tr');
+            const detailsRow = row.detailsRow;
+
+            if (expandedRow && expandedRow !== row) {
+                expandedRow.classList.remove('expanded');
+                expandedRow.detailsRow.classList.remove('show');
             }
 
-            document.getElementById('rankingList').innerHTML = rankingHTML;
+            if (!detailsRow) return;
+
+            if (detailsRow.classList.contains('show')) {
+                detailsRow.classList.remove('show');
+                row.classList.remove('expanded');
+                expandedRow = null;
+            } else {
+                detailsRow.classList.add('show');
+                row.classList.add('expanded');
+                expandedRow = row;
+            }
         }
 
         // Atualizar hora da última sincronização
