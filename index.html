@@ -172,7 +172,7 @@
     </div>
 
     <script>
-        const SHEET_ID = '1tDjZCAdXNvXT2ImVYybGol40zz4Dl1x';
+        const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSJ8rMHFvBx4d4nC7sytJYKZ4RXIJdzktA4EgyG_LAiYiIXh_Sv6GFO9DUXQNJIgQ/pub?gid=259301029&single=true&output=csv';
         const CATEGORIES = [
             "Full Feminino",
             "Full Masculino",
@@ -195,7 +195,7 @@
         // Buscar dados do Google Sheets
         async function fetchData() {
             try {
-                const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=Resultados`;
+                const url = `https://docs.google.com/spreadsheets/d/e/2PACX-1vSJ8rMHFvBx4d4nC7sytJYKZ4RXIJdzktA4EgyG_LAiYiIXh_Sv6GFO9DUXQNJIgQ/pub?gid=259301029&single=true&output=csv`;
                 
                 const response = await fetch(url);
                 const csv = await response.text();
