@@ -364,7 +364,7 @@
     <script>
         // URL do CSV publicado com cache busting
         function getCSVUrl() {
-            const baseUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSJ8rMHFvBx4d4nC7sytJYKZ4RXIJdzktA4EgyG_LAiYiIXh_Sv6GFO9DUXQNJIgQ/pub?output=csv';
+            const baseUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSJ8rMHFvBx4d4nC7sytJYKZ4RXIJdzktA4EgyG_LAiYiIXh_Sv6GFO9DUXQNJIgQ/pub?gid=259301029&single=true&output=csv';
             const timestamp = new Date().getTime();
             return `${baseUrl}&t=${timestamp}`;
         }
