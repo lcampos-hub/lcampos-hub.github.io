@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔥 INTER GAMES - Ranking Ao Vivo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 50%, #1a1a1a 100%);
+            color: #ffffff;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            animation: slideDown 0.6s ease;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .header h1 {
+            font-size: 3em;
+            color: #FF5722;
+            text-shadow: 3px 3px 10px rgba(0,0,0,0.7);
+            margin-bottom: 10px;
+            font-weight: bold;
+            letter-spacing: 2px;
+        }
+
+        .header p {
+            font-size: 1.3em;
+            color: #E64A19;
+            margin: 5px 0;
+            font-weight: bold;
+        }
+
+        .header .subtitle {
+            font-size: 0.95em;
+            color: #ccc;
+            margin-top: 15px;
+            border-top: 2px solid #E64A19;
+            padding-top: 15px;
+        }
+
+        .category-section {
+            margin-bottom: 50px;
+            animation: fadeIn 0.8s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .category-title {
+            background: linear-gradient(90deg, #E64A19 0%, #FF5722 100%);
+            padding: 15px 20px;
+            border-radius: 8px 8px 0 0;
+            font-size: 1.4em;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 15px rgba(230, 74, 25, 0.3);
+        }
+
+        .ranking-table {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid #E64A19;
+            border-top: none;
+            border-radius: 0 0 8px 8px;
+            overflow: hidden;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+            margin-bottom: 20px;
+        }
+
+        .ranking-header {
+            display: grid;
+            grid-template-columns: 80px 1fr 120px 120px;
+            background: rgba(230, 74, 25, 0.15);
+            border-bottom: 2px solid #E64A19;
+            padding: 15px 20px;
+            font-weight: bold;
+            color: #FF5722;
+            font-size: 0.95em;
+        }
+
+        .ranking-row {
+            display: grid;
+            grid-template-columns: 80px 1fr 120px 120px;
+            padding: 15px 20px;
+            border-bottom: 1px solid rgba(230, 74, 25, 0.2);
+            align-items: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .ranking-row:hover {
+            background: rgba(230, 74, 25, 0.1);
+            transform: translateX(5px);
+        }
+
+        .ranking-row:last-child {
+            border-bottom: none;
+        }
+
+        .ranking-row.empty {
+            display: none;
+        }
+
+        .position {
+            font-size: 1.8em;
+            font-weight: bold;
+            text-align: center;
+            color: #FF5722;
+            min-width: 60px;
+        }
+
+        .position.gold {
+            color: #FFD700;
+            text-shadow: 0 0 10px #FFD700;
+        }
+
+        .position.silver {
+            color: #C0C0C0;
+            text-shadow: 0 0 8px #C0C0C0;
+        }
+
+        .position.bronze {
+            color: #CD7F32;
+            text-shadow: 0 0 8px #CD7F32;
+        }
+
+        .dupla-name {
+            font-weight: bold;
+            color: #ffffff;
+            font-size: 1.05em;
+        }
+
+        .tempo {
+            text-align: center;
+            font-family: 'Courier New', monospace;
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #FF5722;
+            background: rgba(230, 74, 25, 0.1);
+            padding: 8px 12px;
+            border-radius: 4px;
+        }
+
+        .status {
+            text-align: center;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .status.finalizado {
+            background: rgba(76, 175, 80, 0.2);
+            color: #4CAF50;
+            border: 1px solid #4CAF50;
+        }
+
+        .status.empate {
+            background: rgba(255, 152, 0, 0.2);
+            color: #FF9800;
+            border: 1px solid #FF9800;
+        }
+
+        .no-data {
+            padding: 40px 20px;
+            text-align: center;
+            color: #999;
+            font-size: 1.1em;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #FF5722;
+            font-size: 1.1em;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 60px;
+            padding: 20px;
+            border-top: 2px solid #E64A19;
+            color: #aaa;
+            font-size: 0.9em;
+        }
+
+        .footer strong {
+            color: #FF5722;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2em;
+            }
+
+            .ranking-header,
+            .ranking-row {
+                grid-template-columns: 60px 1fr 80px;
+                font-size: 0.9em;
+            }
+
+            .tempo {
+                font-size: 1em;
+            }
+
+            .status {
+                font-size: 0.75em;
+                padding: 4px 8px;
+            }
+        }
+
+        .medal {
+            display: inline-block;
+            margin-right: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔥 INTER GAMES 🔥</h1>
+            <p>A BATALHA DOS 100</p>
+            <div class="subtitle">
+                <div>📅 02 de Agosto de 2026 | 📍 Roque Box Goiânia</div>
+                <div style="margin-top: 10px; font-size: 0.9em;">Ranking Ao Vivo - For Time</div>
+            </div>
+        </div>
+
+        <div id="rankings-container"></div>
+
+        <div class="footer">
+            <strong>INTER GAMES experience</strong> - A Batalha dos 100<br>
+            Prepare-se para a maior batalha do ano! 🏆<br>
+            <small style="display: block; margin-top: 10px;">Dados atualizados automaticamente</small>
+        </div>
+    </div>
+
+    <script>
+        const CATEGORIES = [
+            "Full Feminino",
+            "Full Masculino",
+            "Full Misto",
+            "Revezamento Feminino",
+            "Revezamento Masculino",
+            "Revezamento Misto",
+            "Iniciante Feminino",
+            "Iniciante Masculino",
+            "Iniciante Misto"
+        ];
+
+        function timeToSeconds(timeStr) {
+            if (!timeStr || timeStr === '-') return Infinity;
+            try {
+                const parts = timeStr.split(':');
+                const minutes = parseInt(parts[0]) || 0;
+                const seconds = parseInt(parts[1]) || 0;
+                return minutes * 60 + seconds;
+            } catch {
+                return Infinity;
+            }
+        }
+
+        function secondsToTime(seconds) {
+            if (seconds === Infinity) return '-';
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${mins}:${String(secs).padStart(2, '0')}`;
+        }
+
+        async function loadData() {
+            try {
+                // Simulando dados - você vai conectar com sua Google Sheets depois
+                const mockData = [
+                    { id: 1, dupla: "Dupla A", categoria: "Full Feminino", tempo: "12:45", status: "Finalizado" },
+                    { id: 2, dupla: "Dupla B", categoria: "Full Feminino", tempo: "13:20", status: "Finalizado" },
+                    { id: 3, dupla: "Dupla C", categoria: "Full Masculino", tempo: "10:30", status: "Finalizado" },
+                    { id: 4, dupla: "Dupla D", categoria: "Full Masculino", tempo: "11:15", status: "Finalizado" },
+                    { id: 5, dupla: "Dupla E", categoria: "Full Misto", tempo: "14:05", status: "Finalizado" },
+                ];
+
+                renderRankings(mockData);
+            } catch (error) {
+                console.error('Erro ao carregar dados:', error);
+                document.getElementById('rankings-container').innerHTML = 
+                    '<div class="no-data">Erro ao carregar dados. Tente novamente mais tarde.</div>';
+            }
+        }
+
+        function renderRankings(data) {
+            const container = document.getElementById('rankings-container');
+            container.innerHTML = '';
+
+            for (const category of CATEGORIES) {
+                const categoryData = data
+                    .filter(row => row.categoria === category && row.status === 'Finalizado')
+                    .sort((a, b) => timeToSeconds(a.tempo) - timeToSeconds(b.tempo));
+
+                const categoryHTML = `
+                    <div class="category-section">
+                        <div class="category-title">${category}</div>
+                        <div class="ranking-table">
+                            ${categoryData.length > 0 ? `
+                                <div class="ranking-header">
+                                    <div>Posição</div>
+                                    <div>Dupla</div>
+                                    <div>Tempo</div>
+                                    <div>Status</div>
+                                </div>
+                                ${categoryData.map((row, index) => {
+                                    const position = index + 1;
+                                    let medal = '';
+                                    let posClass = '';
+                                    if (position === 1) {
+                                        medal = '🥇';
+                                        posClass = 'gold';
+                                    } else if (position === 2) {
+                                        medal = '🥈';
+                                        posClass = 'silver';
+                                    } else if (position === 3) {
+                                        medal = '🥉';
+                                        posClass = 'bronze';
+                                    }
+
+                                    return `
+                                        <div class="ranking-row">
+                                            <div class="position ${posClass}">
+                                                <span class="medal">${medal}</span>${position}º
+                                            </div>
+                                            <div class="dupla-name">${row.dupla}</div>
+                                            <div class="tempo">${row.tempo}</div>
+                                            <div class="status ${row.status.toLowerCase()}">${row.status}</div>
+                                        </div>
+                                    `;
+                                }).join('')}
+                            ` : `
+                                <div class="no-data">Sem dados ainda nesta categoria</div>
+                            `}
+                        </div>
+                    </div>
+                `;
+
+                container.innerHTML += categoryHTML;
+            }
+        }
+
+        // Carregar dados ao iniciar
+        loadData();
+
+        // Auto-recarregar a cada 30 segundos (para dados ao vivo)
+        setInterval(loadData, 30000);
+    </script>
+</body>
+</html>
