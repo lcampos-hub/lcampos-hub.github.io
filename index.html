@@ -292,7 +292,7 @@
 
     <script>
         // ID da planilha
-        const SHEET_ID = '1tDjZCAdXNvXT2ImVYybGol40zz4Dl1x';
+        const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSJ8rMHFvBx4d4nC7sytJYKZ4RXIJdzktA4EgyG_LAiYiIXh_Sv6GFO9DUXQNJIgQ/pub?gid=259301029&single=true&output=csv';
         
         const CATEGORIES = [
             "Full Feminino",
@@ -321,7 +321,7 @@
         async function fetchData() {
             try {
                 // URL da API pública - retorna JSON
-                const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=Resultados`;
+                const url = const url = CSV_URL
                 
                 console.log('Fetching from:', url);
                 
