@@ -246,6 +246,17 @@
         .gold { color: #FFD700; }
         .silver { color: #C0C0C0; }
         .bronze { color: #CD7F32; }
+
+        .debug-info {
+            background: rgba(255, 87, 34, 0.1);
+            border: 1px solid #FF5722;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 0.8em;
+            margin-top: 20px;
+            color: #FFD700;
+            font-family: monospace;
+        }
     </style>
 </head>
 <body>
@@ -269,16 +280,19 @@
             <div id="podium" class="podium"></div>
             
             <div id="rankingList"></div>
+
+            <div id="debugInfo" class="debug-info" style="display:none;"></div>
         </div>
 
         <div class="refresh-info">
-            ⏱️ Atualiza automaticamente a cada 30 minutos<br>
+            ⏱️ Atualiza automaticamente a cada 5 minutos<br>
             📊 Dados originários de Google Sheets
         </div>
     </div>
 
     <script>
-        const CSV_URL = 'https://docs.google.com/spreadsheets/d/1tDjZCAdXNvXT2ImVYybGol40zz4Dl1x/gviz/tq?tqx=out:csv&sheet=Resultados';
+        // ID da planilha
+        const SHEET_ID = '1tDjZCAdXNvXT2ImVYybGol40zz4Dl1x';
         
         const CATEGORIES = [
             "Full Feminino",
@@ -298,41 +312,68 @@
         function timeToSeconds(timeStr) {
             if (!timeStr) return Infinity;
             const parts = timeStr.split(':');
-            return parseInt(parts[0]) * 60 + parseInt(parts[1]);
+            const minutes = parseInt(parts[0]) || 0;
+            const seconds = parseInt(parts[1]) || 0;
+            return minutes * 60 + seconds;
         }
 
-        // Buscar dados do Google Sheets
+        // Buscar dados via API pública do Google Sheets
         async function fetchData() {
             try {
-                const response = await fetch(CSV_URL);
-                const csv = await response.text();
+                // URL da API pública - retorna JSON
+                const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=Resultados`;
                 
-                const lines = csv.split('\n');
+                console.log('Fetching from:', url);
+                
+                const response = await fetch(url);
+                const responseText = await response.text();
+                
+                // Google retorna wrapped em função - precisamos extrair
+                let jsonStr = responseText.replace(/\/\*O_o\*\/\ngoogle\.visualization\.Query\.setResponse\(/, '').replace(/\);$/, '');
+                
+                console.log('Raw response:', responseText.substring(0, 200));
+                
+                const json = JSON.parse(jsonStr);
+                
                 allData = [];
-
-                // Pular header (linha 0)
-                for (let i = 1; i < lines.length; i++) {
-                    if (lines[i].trim() === '') continue;
-                    
-                    const parts = lines[i].split(',');
-                    if (parts.length >= 5 && parts[0]) {
-                        allData.push({
-                            id: parts[0].trim(),
-                            equipe: parts[1].trim(),
-                            categoria: parts[2].trim(),
-                            tempo: parts[3].trim(),
-                            status: parts[4] ? parts[4].trim() : ""
-                        });
-                    }
+                
+                if (json.table && json.table.rows) {
+                    json.table.rows.forEach(row => {
+                        const values = row.c;
+                        if (values && values[0]) {
+                            allData.push({
+                                id: values[0].v || '',
+                                equipe: values[1] ? values[1].v : '',
+                                categoria: values[2] ? values[2].v : '',
+                                tempo: values[3] ? values[3].v : '',
+                                status: values[4] ? values[4].v : ''
+                            });
+                        }
+                    });
                 }
-
+                
+                console.log('Data loaded:', allData.length, 'rows');
+                
                 populateDropdown();
                 updateLastModified();
+                showDebugInfo(`✅ Carregado ${allData.length} registros`);
+                
             } catch (error) {
                 console.error('Erro ao carregar dados:', error);
+                showDebugInfo(`❌ Erro: ${error.message}`);
                 document.getElementById('rankingList').innerHTML = 
-                    '<div class="no-data">❌ Erro ao carregar dados. Tente atualizar a página.</div>';
+                    '<div class="no-data">❌ Erro ao carregar dados. Tente atualizar a página em alguns segundos.</div>';
             }
+        }
+
+        // Mostrar info de debug
+        function showDebugInfo(msg) {
+            const debug = document.getElementById('debugInfo');
+            debug.textContent = msg;
+            debug.style.display = 'block';
+            setTimeout(() => {
+                debug.style.display = 'none';
+            }, 5000);
         }
 
         // Preencher dropdown com categorias
@@ -347,10 +388,12 @@
             // Adicionar categorias que têm dados
             const categoriasComDados = new Set();
             allData.forEach(item => {
-                if (item.categoria) {
+                if (item.categoria && item.status === "Finalizado") {
                     categoriasComDados.add(item.categoria);
                 }
             });
+
+            console.log('Categorias com dados:', Array.from(categoriasComDados));
 
             // Ordenar por ordem das CATEGORIES
             CATEGORIES.forEach(cat => {
@@ -361,6 +404,11 @@
                     select.appendChild(option);
                 }
             });
+
+            if (categoriasComDados.size === 0) {
+                console.warn('Nenhuma categoria com dados encontrada');
+                showDebugInfo('⚠️ Nenhuma categoria com status "Finalizado" encontrada');
+            }
         }
 
         // Atualizar display
@@ -378,6 +426,8 @@
             const categoryData = allData
                 .filter(row => row.categoria === selectedCategory && row.status === "Finalizado")
                 .sort((a, b) => timeToSeconds(a.tempo) - timeToSeconds(b.tempo));
+
+            console.log(`Category ${selectedCategory}:`, categoryData.length, 'results');
 
             document.getElementById('categoryTitle').textContent = selectedCategory;
 
@@ -455,11 +505,11 @@
         // Carregar dados ao abrir a página
         fetchData();
 
-        // Atualizar a cada 30 minutos (1800000 ms)
-        setInterval(fetchData, 30 * 60 * 1000);
+        // Atualizar a cada 5 minutos
+        setInterval(fetchData, 5 * 60 * 1000);
 
-        // Para teste: descomente para atualizar a cada 5 minutos
-        // setInterval(fetchData, 5 * 60 * 1000);
+        // Para teste: atualizar a cada 30 segundos (descomente)
+        // setInterval(fetchData, 30 * 1000);
     </script>
 </body>
 </html>
