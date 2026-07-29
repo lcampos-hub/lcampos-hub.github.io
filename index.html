@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🔥 INTER GAMES - Ranking Ao Vivo</title>
+    <title>🏆 INTER GAMES - A Batalha dos 100</title>
     <style>
         * {
             margin: 0;
@@ -12,255 +12,167 @@
         }
 
         body {
-            font-family: 'Arial', sans-serif;
-            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 50%, #1a1a1a 100%);
-            color: #ffffff;
-            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1A1A1A 0%, #2D2D2D 100%);
+            color: #fff;
             padding: 20px;
+            min-height: 100vh;
         }
 
         .container {
-            max-width: 900px;
+            max-width: 1200px;
             margin: 0 auto;
         }
 
-        .header {
+        header {
             text-align: center;
             margin-bottom: 40px;
-            animation: slideDown 0.6s ease;
         }
 
-        @keyframes slideDown {
-            from { opacity: 0; transform: translateY(-20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .header h1 {
-            font-size: 3em;
+        h1 {
+            font-size: 2.5em;
             color: #FF5722;
-            text-shadow: 3px 3px 10px rgba(0,0,0,0.7);
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
             margin-bottom: 10px;
-            font-weight: bold;
-            letter-spacing: 2px;
         }
 
-        .header p {
-            font-size: 1.3em;
-            color: #E64A19;
-            margin: 5px 0;
-            font-weight: bold;
+        .subtitle {
+            font-size: 1.2em;
+            color: #CCC;
+            margin-bottom: 10px;
         }
 
-        .header .subtitle {
-            font-size: 0.95em;
-            color: #ccc;
-            margin-top: 15px;
-            border-top: 2px solid #E64A19;
-            padding-top: 15px;
+        .last-update {
+            font-size: 0.9em;
+            color: #999;
+            margin-top: 10px;
         }
 
-        .category-section {
-            margin-bottom: 50px;
-            animation: fadeIn 0.8s ease;
+        .categories-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+        .category-box {
+            background: rgba(255, 87, 34, 0.1);
+            border: 2px solid #FF5722;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(255, 87, 34, 0.2);
         }
 
         .category-title {
-            background: linear-gradient(90deg, #E64A19 0%, #FF5722 100%);
-            padding: 15px 20px;
-            border-radius: 8px 8px 0 0;
-            font-size: 1.4em;
+            background: #FF5722;
+            color: #fff;
+            padding: 12px;
+            border-radius: 5px;
             font-weight: bold;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            box-shadow: 0 4px 15px rgba(230, 74, 25, 0.3);
+            font-size: 1.1em;
+            margin-bottom: 15px;
+            text-align: center;
         }
 
-        .ranking-table {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            border: 1px solid #E64A19;
-            border-top: none;
-            border-radius: 0 0 8px 8px;
-            overflow: hidden;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.4);
-            margin-bottom: 20px;
-        }
-
-        .ranking-header {
-            display: grid;
-            grid-template-columns: 80px 1fr 120px 120px;
-            background: rgba(230, 74, 25, 0.15);
-            border-bottom: 2px solid #E64A19;
-            padding: 15px 20px;
-            font-weight: bold;
-            color: #FF5722;
-            font-size: 0.95em;
-        }
-
-        .ranking-row {
-            display: grid;
-            grid-template-columns: 80px 1fr 120px 120px;
-            padding: 15px 20px;
-            border-bottom: 1px solid rgba(230, 74, 25, 0.2);
+        .ranking-item {
+            display: flex;
             align-items: center;
+            padding: 12px;
+            margin-bottom: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 5px;
+            border-left: 4px solid #FF5722;
             transition: all 0.3s ease;
-            cursor: pointer;
         }
 
-        .ranking-row:hover {
-            background: rgba(230, 74, 25, 0.1);
+        .ranking-item:hover {
+            background: rgba(255, 87, 34, 0.2);
             transform: translateX(5px);
         }
 
-        .ranking-row:last-child {
-            border-bottom: none;
-        }
-
-        .ranking-row.empty {
-            display: none;
-        }
-
         .position {
+            font-size: 1.5em;
+            font-weight: bold;
+            min-width: 40px;
+            text-align: center;
+            margin-right: 12px;
+        }
+
+        .medal {
             font-size: 1.8em;
+            margin-right: 8px;
+        }
+
+        .team-info {
+            flex: 1;
+        }
+
+        .team-name {
             font-weight: bold;
-            text-align: center;
-            color: #FF5722;
-            min-width: 60px;
+            font-size: 1em;
+            margin-bottom: 3px;
         }
 
-        .position.gold {
-            color: #FFD700;
-            text-shadow: 0 0 10px #FFD700;
-        }
-
-        .position.silver {
-            color: #C0C0C0;
-            text-shadow: 0 0 8px #C0C0C0;
-        }
-
-        .position.bronze {
-            color: #CD7F32;
-            text-shadow: 0 0 8px #CD7F32;
-        }
-
-        .dupla-name {
-            font-weight: bold;
-            color: #ffffff;
-            font-size: 1.05em;
-        }
-
-        .tempo {
-            text-align: center;
-            font-family: 'Courier New', monospace;
-            font-size: 1.2em;
-            font-weight: bold;
-            color: #FF5722;
-            background: rgba(230, 74, 25, 0.1);
-            padding: 8px 12px;
-            border-radius: 4px;
-        }
-
-        .status {
-            text-align: center;
-            padding: 6px 12px;
-            border-radius: 20px;
+        .team-time {
             font-size: 0.85em;
-            font-weight: bold;
-            text-transform: uppercase;
-        }
-
-        .status.finalizado {
-            background: rgba(76, 175, 80, 0.2);
-            color: #4CAF50;
-            border: 1px solid #4CAF50;
-        }
-
-        .status.empate {
-            background: rgba(255, 152, 0, 0.2);
-            color: #FF9800;
-            border: 1px solid #FF9800;
+            color: #FF5722;
         }
 
         .no-data {
-            padding: 40px 20px;
             text-align: center;
             color: #999;
-            font-size: 1.1em;
+            padding: 20px;
+            font-style: italic;
         }
 
         .loading {
             text-align: center;
             padding: 20px;
             color: #FF5722;
-            font-size: 1.1em;
         }
 
-        .footer {
+        .refresh-info {
             text-align: center;
-            margin-top: 60px;
-            padding: 20px;
-            border-top: 2px solid #E64A19;
-            color: #aaa;
+            color: #999;
+            margin-top: 40px;
             font-size: 0.9em;
         }
 
-        .footer strong {
-            color: #FF5722;
-        }
-
         @media (max-width: 768px) {
-            .header h1 {
-                font-size: 2em;
+            h1 {
+                font-size: 1.8em;
             }
 
-            .ranking-header,
-            .ranking-row {
-                grid-template-columns: 60px 1fr 80px;
-                font-size: 0.9em;
-            }
-
-            .tempo {
-                font-size: 1em;
-            }
-
-            .status {
-                font-size: 0.75em;
-                padding: 4px 8px;
+            .categories-container {
+                grid-template-columns: 1fr;
             }
         }
 
-        .medal {
-            display: inline-block;
-            margin-right: 5px;
-        }
+        .gold { color: #FFD700; }
+        .silver { color: #C0C0C0; }
+        .bronze { color: #CD7F32; }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="header">
-            <h1>🔥 INTER GAMES 🔥</h1>
-            <p>A BATALHA DOS 100</p>
-            <div class="subtitle">
-                <div>📅 02 de Agosto de 2026 | 📍 Roque Box Goiânia</div>
-                <div style="margin-top: 10px; font-size: 0.9em;">Ranking Ao Vivo - For Time</div>
-            </div>
+        <header>
+            <h1>🏆 INTER GAMES experience</h1>
+            <h2 class="subtitle">A Batalha dos 100 - Roque Box Goiânia</h2>
+            <div class="last-update" id="lastUpdate">Carregando dados...</div>
+        </header>
+
+        <div id="rankingContainer" class="categories-container">
+            <div class="loading">Carregando dados do Google Sheets...</div>
         </div>
 
-        <div id="rankings-container"></div>
-
-        <div class="footer">
-            <strong>INTER GAMES experience</strong> - A Batalha dos 100<br>
-            Prepare-se para a maior batalha do ano! 🏆<br>
-            <small style="display: block; margin-top: 10px;">Dados atualizados automaticamente</small>
+        <div class="refresh-info">
+            ⏱️ Atualiza automaticamente a cada 30 minutos<br>
+            📊 Dados originários de Google Sheets
         </div>
     </div>
 
     <script>
+        const SHEET_ID = '1tDjZCAdXNvXT2ImVYybGol40zz4Dl1x';
         const CATEGORIES = [
             "Full Feminino",
             "Full Masculino",
@@ -268,111 +180,128 @@
             "Revezamento Feminino",
             "Revezamento Masculino",
             "Revezamento Misto",
-            "Iniciante Feminino",
-            "Iniciante Masculino",
-            "Iniciante Misto"
+            "Short Feminino",
+            "Short Masculino",
+            "Short Misto"
         ];
 
+        // Converter tempo MM:SS em segundos para ordenar
         function timeToSeconds(timeStr) {
-            if (!timeStr || timeStr === '-') return Infinity;
-            try {
-                const parts = timeStr.split(':');
-                const minutes = parseInt(parts[0]) || 0;
-                const seconds = parseInt(parts[1]) || 0;
-                return minutes * 60 + seconds;
-            } catch {
-                return Infinity;
-            }
+            if (!timeStr) return Infinity;
+            const parts = timeStr.split(':');
+            return parseInt(parts[0]) * 60 + parseInt(parts[1]);
         }
 
-        function secondsToTime(seconds) {
-            if (seconds === Infinity) return '-';
-            const mins = Math.floor(seconds / 60);
-            const secs = seconds % 60;
-            return `${mins}:${String(secs).padStart(2, '0')}`;
-        }
-
-        async function loadData() {
+        // Buscar dados do Google Sheets
+        async function fetchData() {
             try {
-                // Simulando dados - você vai conectar com sua Google Sheets depois
-                const mockData = [
-                    { id: 1, dupla: "Dupla A", categoria: "Full Feminino", tempo: "12:45", status: "Finalizado" },
-                    { id: 2, dupla: "Dupla B", categoria: "Full Feminino", tempo: "13:20", status: "Finalizado" },
-                    { id: 3, dupla: "Dupla C", categoria: "Full Masculino", tempo: "10:30", status: "Finalizado" },
-                    { id: 4, dupla: "Dupla D", categoria: "Full Masculino", tempo: "11:15", status: "Finalizado" },
-                    { id: 5, dupla: "Dupla E", categoria: "Full Misto", tempo: "14:05", status: "Finalizado" },
-                ];
+                const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=Resultados`;
+                
+                const response = await fetch(url);
+                const csv = await response.text();
+                
+                const lines = csv.split('\n');
+                const data = [];
 
-                renderRankings(mockData);
+                // Pular header (linha 0)
+                for (let i = 1; i < lines.length; i++) {
+                    if (lines[i].trim() === '') continue;
+                    
+                    const parts = lines[i].split(',');
+                    if (parts.length >= 4 && parts[0]) {
+                        data.push({
+                            id: parts[0].trim(),
+                            equipe: parts[1].trim(),
+                            categoria: parts[2].trim(),
+                            tempo: parts[3].trim(),
+                            status: parts[4] ? parts[4].trim() : ""
+                        });
+                    }
+                }
+
+                renderRanking(data);
+                updateLastModified();
             } catch (error) {
                 console.error('Erro ao carregar dados:', error);
-                document.getElementById('rankings-container').innerHTML = 
-                    '<div class="no-data">Erro ao carregar dados. Tente novamente mais tarde.</div>';
+                document.getElementById('rankingContainer').innerHTML = 
+                    '<div class="no-data">❌ Erro ao carregar dados. Tente atualizar a página.</div>';
             }
         }
 
-        function renderRankings(data) {
-            const container = document.getElementById('rankings-container');
+        // Renderizar ranking
+        function renderRanking(data) {
+            const container = document.getElementById('rankingContainer');
             container.innerHTML = '';
 
             for (const category of CATEGORIES) {
                 const categoryData = data
-                    .filter(row => row.categoria === category && row.status === 'Finalizado')
+                    .filter(row => row.categoria === category && row.status === "Finalizado")
                     .sort((a, b) => timeToSeconds(a.tempo) - timeToSeconds(b.tempo));
 
-                const categoryHTML = `
-                    <div class="category-section">
-                        <div class="category-title">${category}</div>
-                        <div class="ranking-table">
-                            ${categoryData.length > 0 ? `
-                                <div class="ranking-header">
-                                    <div>Posição</div>
-                                    <div>Dupla</div>
-                                    <div>Tempo</div>
-                                    <div>Status</div>
-                                </div>
-                                ${categoryData.map((row, index) => {
-                                    const position = index + 1;
-                                    let medal = '';
-                                    let posClass = '';
-                                    if (position === 1) {
-                                        medal = '🥇';
-                                        posClass = 'gold';
-                                    } else if (position === 2) {
-                                        medal = '🥈';
-                                        posClass = 'silver';
-                                    } else if (position === 3) {
-                                        medal = '🥉';
-                                        posClass = 'bronze';
-                                    }
+                const categoryBox = document.createElement('div');
+                categoryBox.className = 'category-box';
 
-                                    return `
-                                        <div class="ranking-row">
-                                            <div class="position ${posClass}">
-                                                <span class="medal">${medal}</span>${position}º
-                                            </div>
-                                            <div class="dupla-name">${row.dupla}</div>
-                                            <div class="tempo">${row.tempo}</div>
-                                            <div class="status ${row.status.toLowerCase()}">${row.status}</div>
-                                        </div>
-                                    `;
-                                }).join('')}
-                            ` : `
-                                <div class="no-data">Sem dados ainda nesta categoria</div>
-                            `}
-                        </div>
-                    </div>
-                `;
+                const titleDiv = document.createElement('div');
+                titleDiv.className = 'category-title';
+                titleDiv.textContent = category;
+                categoryBox.appendChild(titleDiv);
 
-                container.innerHTML += categoryHTML;
+                if (categoryData.length === 0) {
+                    const noData = document.createElement('div');
+                    noData.className = 'no-data';
+                    noData.textContent = 'Sem dados ainda';
+                    categoryBox.appendChild(noData);
+                } else {
+                    categoryData.forEach((row, index) => {
+                        const position = index + 1;
+                        let medal = '';
+                        let medalClass = '';
+
+                        if (position === 1) {
+                            medal = '🥇';
+                            medalClass = 'gold';
+                        } else if (position === 2) {
+                            medal = '🥈';
+                            medalClass = 'silver';
+                        } else if (position === 3) {
+                            medal = '🥉';
+                            medalClass = 'bronze';
+                        }
+
+                        const item = document.createElement('div');
+                        item.className = 'ranking-item';
+                        item.innerHTML = `
+                            <div class="position ${medalClass}">
+                                <span class="medal">${medal}</span>${position}º
+                            </div>
+                            <div class="team-info">
+                                <div class="team-name">${row.equipe}</div>
+                                <div class="team-time">⏱️ ${row.tempo}</div>
+                            </div>
+                        `;
+                        categoryBox.appendChild(item);
+                    });
+                }
+
+                container.appendChild(categoryBox);
             }
         }
 
-        // Carregar dados ao iniciar
-        loadData();
+        // Atualizar hora da última sincronização
+        function updateLastModified() {
+            const now = new Date();
+            const time = now.toLocaleTimeString('pt-BR');
+            document.getElementById('lastUpdate').textContent = `✅ Atualizado em ${time}`;
+        }
 
-        // Auto-recarregar a cada 30 segundos (para dados ao vivo)
-        setInterval(loadData, 30000);
+        // Carregar dados ao abrir a página
+        fetchData();
+
+        // Atualizar a cada 30 minutos (1800000 ms)
+        setInterval(fetchData, 30 * 60 * 1000);
+
+        // Também atualizar a cada 5 minutos para teste (descomentar para teste)
+        // setInterval(fetchData, 5 * 60 * 1000);
     </script>
 </body>
 </html>
