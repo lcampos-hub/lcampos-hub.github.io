@@ -362,8 +362,12 @@
     </div>
 
     <script>
-        // URL do CSV publicado
-        const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSJ8rMHFvBx4d4nC7sytJYKZ4RXIJdzktA4EgyG_LAiYiIXh_Sv6GFO9DUXQNJIgQ/pub?gid=259301029&single=true&output=csv';
+        // URL do CSV publicado com cache busting
+        function getCSVUrl() {
+            const baseUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSJ8rMHFvBx4d4nC7sytJYKZ4RXIJdzktA4EgyG_LAiYiIXh_Sv6GFO9DUXQNJIgQ/pub?gid=259301029&single=true&output=csv';
+            const timestamp = new Date().getTime();
+            return `${baseUrl}&t=${timestamp}`;
+        }
         
         const CATEGORIES = [
             "Full Feminino",
@@ -399,7 +403,7 @@
         // Buscar dados
         async function fetchData() {
             try {
-                const response = await fetch(CSV_URL);
+                const response = await fetch(getCSVUrl());
                 const csv = await response.text();
                 
                 const lines = csv.split('\n');
@@ -464,13 +468,22 @@
             const categorySelect = document.getElementById('categorySelect');
             const selectedCategory = categorySelect.value;
 
-            let categoryData = allData.filter(row => row.status === "Finalizado");
+            let allDataForDisplay = allData; // TODOS os dados
 
             if (selectedCategory) {
-                categoryData = categoryData.filter(row => row.categoria === selectedCategory);
+                allDataForDisplay = allDataForDisplay.filter(row => row.categoria === selectedCategory);
             }
 
-            categoryData.sort((a, b) => timeToSeconds(a.tempo) - timeToSeconds(b.tempo));
+            // Separar: Finalizados e Não Finalizados
+            const finalizados = allDataForDisplay
+                .filter(row => row.status === "Finalizado")
+                .sort((a, b) => timeToSeconds(a.tempo) - timeToSeconds(b.tempo));
+
+            const naoFinalizados = allDataForDisplay
+                .filter(row => row.status !== "Finalizado");
+
+            // Combinar: Finalizados primeiro, depois não finalizados
+            const categoryData = [...finalizados, ...naoFinalizados];
 
             const tableBody = document.getElementById('tableBody');
             const cardsContainer = document.getElementById('cardsContainer');
@@ -488,34 +501,43 @@
             cardsContainer.innerHTML = '';
 
             categoryData.forEach((row, index) => {
-                const position = index + 1;
-                const points = calculatePoints(position);
+                // Só é "colocação" se for Finalizado
+                const isFinalized = row.status === "Finalizado";
+                const position = isFinalized ? finalizados.indexOf(row) + 1 : null;
+                const points = isFinalized ? calculatePoints(position) : 0;
+                
                 let medal = '';
                 let rankClass = '';
+                let displayPosition = '';
 
-                if (position === 1) {
-                    medal = '🥇';
-                    rankClass = 'first';
-                } else if (position === 2) {
-                    medal = '🥈';
-                    rankClass = 'second';
-                } else if (position === 3) {
-                    medal = '🥉';
-                    rankClass = 'third';
+                if (isFinalized) {
+                    if (position === 1) {
+                        medal = '🥇';
+                        rankClass = 'first';
+                    } else if (position === 2) {
+                        medal = '🥈';
+                        rankClass = 'second';
+                    } else if (position === 3) {
+                        medal = '🥉';
+                        rankClass = 'third';
+                    }
+                    displayPosition = `<span class="medal">${medal}</span>${position}`;
+                } else {
+                    displayPosition = '-';
                 }
 
                 // VERSÃO DESKTOP
                 const mainRow = document.createElement('tr');
                 mainRow.innerHTML = `
                     <td class="rank ${rankClass}">
-                        <span class="medal">${medal}</span>${position}
+                        ${displayPosition}
                     </td>
                     <td>
                         <div class="team-name">${row.equipe}</div>
                         <div class="category">${row.categoria}</div>
                     </td>
-                    <td class="time">⏱️ ${row.tempo}</td>
-                    <td class="points">${points}</td>
+                    <td class="time">${row.tempo ? '⏱️ ' + row.tempo : '-'}</td>
+                    <td class="points">${isFinalized ? points : '-'}</td>
                     <td style="text-align: center;">
                         <span class="expand-icon" onclick="toggleDetails(event, this)">▼</span>
                     </td>
@@ -528,8 +550,7 @@
                 card.innerHTML = `
                     <div class="card-header">
                         <div class="rank-badge ${rankClass}">
-                            <span class="medal">${medal}</span>
-                            ${position}º
+                            ${isFinalized ? `<span class="medal">${medal}</span>${position}º` : '⏳'}
                         </div>
                         <button class="expand-btn" onclick="toggleCard(this)">+ Info</button>
                     </div>
@@ -538,11 +559,11 @@
                     <div class="card-info">
                         <div class="info-item">
                             <div class="info-label">Tempo</div>
-                            <div class="info-value">⏱️ ${row.tempo}</div>
+                            <div class="info-value">${row.tempo ? '⏱️ ' + row.tempo : '⏳ Aguardando'}</div>
                         </div>
                         <div class="info-item">
                             <div class="info-label">Pontos</div>
-                            <div class="info-value points">⭐ ${points}</div>
+                            <div class="info-value points">${isFinalized ? '⭐ ' + points : '⏳'}</div>
                         </div>
                     </div>
                     <div class="card-details">
@@ -555,6 +576,9 @@
                                 <div class="athlete-label">Atleta 2</div>
                                 <div class="athlete-name">${row.atleta2}</div>
                             </div>
+                        </div>
+                        <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #444; font-size: 0.85em; color: #FF5722;">
+                            Status: <strong>${row.status}</strong>
                         </div>
                     </div>
                 `;
