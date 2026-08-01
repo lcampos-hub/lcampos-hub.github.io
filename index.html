@@ -540,13 +540,13 @@
 
                     const parts = lines[i].split(',');
                     if (parts.length >= 2 && parts[0]) {
-                        const horario = parts[0].trim();
-                        const nomeEquipe = parts[1].trim();
+                        const nomeEquipe = parts[0].trim();
+                        const atleta1 = parts[1] ? parts[1].trim() : '';
                         const categoria = parts[2] ? parts[2].trim() : '';
-                        const atleta1 = parts[3] ? parts[3].trim() : '';
-                        const atleta2 = parts[4] ? parts[4].trim() : '';
-                        const bateria = parts[5] ? parts[5].trim() : '';
-                        const intervalo = parts[6] ? parts[6].trim() : '';
+                        const atleta2 = parts[3] ? parts[3].trim() : '';
+                        const bateria = parts[4] ? parts[4].trim() : '';
+                        const intervalo = parts[5] ? parts[5].trim() : '';
+                        const horario = parts[6] ? parts[6].trim() : '';
                         const descricao = nomeEquipe;
 
                         const isPause = descricao.toLowerCase().includes('intervalo') || intervalo.toLowerCase().includes('sim');
