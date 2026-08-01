@@ -91,12 +91,14 @@
             border-radius: 5px;
             overflow-x: auto;
             overflow-y: hidden;
+            -webkit-overflow-scrolling: touch;
         }
 
         .timeline-table {
             width: 100%;
             border-collapse: collapse;
-            table-layout: fixed;
+            table-layout: auto;
+            min-width: 600px;
         }
 
         .timeline-table thead {
@@ -108,9 +110,10 @@
         }
 
         .timeline-table th {
-            padding: 12px;
+            padding: 10px;
             text-align: left;
             font-size: 0.75em;
+            white-space: nowrap;
         }
 
         .timeline-table tbody tr {
@@ -124,9 +127,11 @@
         }
 
         .timeline-table td {
-            padding: 10px 8px;
-            word-break: break-word;
+            padding: 10px;
             font-size: 0.9em;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .timeline-equipe {
@@ -356,59 +361,103 @@
         }
 
         @media (max-width: 768px) {
+            body {
+                padding: 8px;
+            }
+
+            h1 {
+                font-size: 1.3em;
+            }
+
             .tabs {
                 flex-direction: column;
+                gap: 8px;
             }
 
             .tab-btn {
                 width: 100%;
-            }
-
-            .timeline::before {
-                left: 20px;
-            }
-
-            .timeline-item {
-                padding-left: 80px;
-            }
-
-            .timeline-dot {
-                left: 5px;
-                width: 25px;
-                height: 25px;
-            }
-
-            table {
+                padding: 10px;
                 font-size: 0.85em;
-                min-width: 500px;
             }
 
-            th {
-                padding: 8px 4px;
-                font-size: 0.7em;
-            }
-
-            td {
-                padding: 8px 4px;
+            .event-info {
+                padding: 10px;
             }
 
             .event-info-item {
                 display: block;
-                margin-bottom: 15px;
+                margin-bottom: 10px;
+            }
+
+            .event-info-label {
+                font-size: 0.75em;
+            }
+
+            .event-info-value {
+                font-size: 0.95em;
+            }
+
+            .timeline-table-container {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            .timeline-table {
+                font-size: 0.7em;
+                min-width: 550px;
+            }
+
+            .timeline-table th {
+                padding: 6px 4px;
+                font-size: 0.65em;
+            }
+
+            .timeline-table td {
+                padding: 6px 4px;
+                font-size: 0.7em;
+            }
+
+            .timeline-expand-table-btn {
+                padding: 3px 5px;
+                font-size: 0.7em;
             }
 
             .leaderboard-controls {
                 flex-direction: column;
-                align-items: flex-start;
+                align-items: stretch;
             }
 
             select {
                 width: 100%;
+                font-size: 0.9em;
             }
 
             .leaderboard-container {
                 overflow-x: auto;
                 -webkit-overflow-scrolling: touch;
+            }
+
+            table {
+                font-size: 0.7em;
+                min-width: 480px;
+            }
+
+            th {
+                padding: 6px 4px;
+                font-size: 0.6em;
+            }
+
+            td {
+                padding: 6px 4px;
+                font-size: 0.7em;
+            }
+
+            .leaderboard-details {
+                padding: 8px;
+            }
+
+            .athlete-detail {
+                font-size: 0.75em;
             }
         }
     </style>
@@ -447,11 +496,11 @@
                 <table class="timeline-table">
                     <thead>
                         <tr>
-                            <th style="width: 12%;">Horário</th>
-                            <th style="width: 30%;">Equipe</th>
-                            <th style="width: 15%;">Categoria</th>
-                            <th style="width: 12%;">Bateria</th>
-                            <th style="width: 5%; text-align: center;">+</th>
+                            <th style="width: 80px; min-width: 80px;">Horário</th>
+                            <th style="width: 150px; min-width: 150px;">Equipe</th>
+                            <th style="width: 120px; min-width: 120px;">Categoria</th>
+                            <th style="width: 80px; min-width: 80px;">Bateria</th>
+                            <th style="width: 50px; min-width: 50px; text-align: center;">+</th>
                         </tr>
                     </thead>
                     <tbody id="timelineContent">
