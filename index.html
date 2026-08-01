@@ -101,7 +101,7 @@
         }
 
         .timeline-item {
-            margin-bottom: 30px;
+            margin-bottom: 25px;
             padding-left: 100px;
             position: relative;
         }
@@ -123,7 +123,7 @@
         }
 
         .timeline-dot.current {
-            background: #00FF00;
+            background: #90EE90;
             box-shadow: 0 0 15px rgba(0, 255, 0, 0.5);
         }
 
@@ -138,11 +138,17 @@
             margin-bottom: 5px;
         }
 
-        .timeline-category {
+        .timeline-content {
             background: rgba(255, 87, 34, 0.15);
             border-left: 3px solid #FF5722;
             padding: 12px;
             border-radius: 3px;
+        }
+
+        .timeline-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             margin-bottom: 8px;
         }
 
@@ -152,10 +158,41 @@
             font-size: 0.95em;
         }
 
-        .timeline-batches {
-            font-size: 0.9em;
+        .timeline-bateria {
             color: #A8D5A8;
-            margin-top: 5px;
+            font-size: 0.85em;
+        }
+
+        .timeline-expand-btn {
+            background: #FF5722;
+            color: #fff;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+
+        .timeline-expand-btn:hover {
+            background: #E64A19;
+        }
+
+        .timeline-details {
+            display: none;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #FF5722;
+            font-size: 0.9em;
+        }
+
+        .timeline-details.show {
+            display: block;
+        }
+
+        .timeline-athlete {
+            color: #A8D5A8;
+            margin: 5px 0;
         }
 
         .timeline-status {
@@ -166,6 +203,37 @@
         }
 
         /* LEADERBOARD */
+        .leaderboard-controls {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .control-label {
+            color: #FF5722;
+            font-weight: bold;
+            font-size: 0.9em;
+            text-transform: uppercase;
+        }
+
+        select {
+            padding: 10px 12px;
+            font-size: 0.9em;
+            border: 2px solid #FF5722;
+            background: #2D2D2D;
+            color: #FF5722;
+            border-radius: 3px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        select:focus {
+            outline: none;
+            box-shadow: 0 0 8px rgba(255, 87, 34, 0.5);
+        }
+
         .leaderboard-container {
             background: #2D2D2D;
             border: 2px solid #FF5722;
@@ -194,6 +262,7 @@
         tbody tr {
             border-bottom: 1px solid #444;
             transition: background-color 0.2s;
+            cursor: pointer;
         }
 
         tbody tr:hover {
@@ -255,6 +324,25 @@
         .status-aguardando {
             background: #FFA500;
             color: #000;
+        }
+
+        .leaderboard-details {
+            display: none;
+            background: rgba(255, 87, 34, 0.1);
+            padding: 12px;
+            margin-top: 8px;
+            border-left: 3px solid #FF5722;
+            border-radius: 3px;
+        }
+
+        .leaderboard-details.show {
+            display: block;
+        }
+
+        .athlete-detail {
+            color: #A8D5A8;
+            font-size: 0.9em;
+            margin: 5px 0;
         }
 
         .no-data {
@@ -324,6 +412,15 @@
                 display: block;
                 margin-bottom: 15px;
             }
+
+            .leaderboard-controls {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            select {
+                width: 100%;
+            }
         }
     </style>
 </head>
@@ -355,10 +452,6 @@
                     <div class="event-info-label">Total de Duplas</div>
                     <div class="event-info-value">21</div>
                 </div>
-                <div class="event-info-item">
-                    <div class="event-info-label">Duração Prova</div>
-                    <div class="event-info-value">~50 min</div>
-                </div>
             </div>
 
             <div class="timeline" id="timelineContent"></div>
@@ -366,16 +459,23 @@
 
         <!-- TAB: LEADERBOARD -->
         <div id="leaderboard" class="tab-content">
+            <div class="leaderboard-controls">
+                <label class="control-label">Categoria:</label>
+                <select id="categorySelect" onchange="updateLeaderboard()">
+                    <option value="">-- Selecione uma categoria --</option>
+                </select>
+            </div>
+
             <div class="leaderboard-container">
                 <table id="leaderboardTable">
                     <thead>
                         <tr>
                             <th style="width: 8%;">Rank</th>
                             <th style="width: 30%;">Equipe</th>
-                            <th style="width: 20%;">Categoria</th>
                             <th style="width: 15%;">Tempo</th>
                             <th style="width: 12%;">Pontos</th>
                             <th style="width: 15%;">Status</th>
+                            <th style="width: 5%; text-align: center;">+</th>
                         </tr>
                     </thead>
                     <tbody id="leaderboardBody">
@@ -383,7 +483,7 @@
                 </table>
 
                 <div id="leaderboardNoData" class="no-data" style="display:none;">
-                    📋 Nenhum resultado ainda
+                    📋 Selecione uma categoria para ver os resultados
                 </div>
             </div>
         </div>
@@ -404,6 +504,10 @@
             return `${baseUrl}&t=${timestamp}`;
         }
 
+        let allData = [];
+        let timelineData = [];
+        let expandedTeam = null;
+
         const CATEGORIES = [
             "Full Masculino",
             "Revezamento Masculino",
@@ -416,9 +520,6 @@
             "Short Feminino",
             "Kids"
         ];
-
-        let allData = [];
-        let timelineData = [];
 
         // GERAR TIMELINE A PARTIR DO CSV
         async function fetchTimelineFromCSV() {
@@ -439,8 +540,10 @@
                         const horario = parts[0].trim();
                         const descricao = parts[1].trim();
                         const categoria = parts[2] ? parts[2].trim() : '';
-                        const baterias = parts[3] ? parts[3].trim() : '';
-                        const intervalo = parts[4] ? parts[4].trim() : '';
+                        const bateria = parts[3] ? parts[3].trim() : '';
+                        const atleta1 = parts[4] ? parts[4].trim() : '';
+                        const atleta2 = parts[5] ? parts[5].trim() : '';
+                        const intervalo = parts[6] ? parts[6].trim() : '';
 
                         const isPause = descricao.toLowerCase().includes('intervalo') || intervalo.toLowerCase().includes('sim');
 
@@ -455,7 +558,9 @@
                             timelineData.push({
                                 time: horario,
                                 category: categoria || descricao,
-                                batchesText: baterias || 'Dados não informados',
+                                bateria: bateria || 'N/A',
+                                atleta1: atleta1,
+                                atleta2: atleta2,
                                 isPause: false,
                                 index: index++
                             });
@@ -466,9 +571,6 @@
                 renderTimelineFromData();
             } catch (error) {
                 console.error('Erro ao carregar timeline:', error);
-                // Se falhar, usar timeline padrão
-                timelineData = generateTimeline();
-                renderTimelineFromData();
             }
         }
 
@@ -487,12 +589,26 @@
                         <div class="timeline-status">${item.content}</div>
                     `;
                 } else {
+                    const teamKey = `${item.category}-${item.index}`;
+                    const isExpanded = expandedTeam === teamKey;
+
                     div.innerHTML = `
                         <div class="timeline-dot current">${item.index + 1}</div>
                         <div class="timeline-time">${item.time}</div>
-                        <div class="timeline-category">
-                            <div class="timeline-category-name">${item.category}</div>
-                            <div class="timeline-batches">🏃 ${item.batchesText}</div>
+                        <div class="timeline-content">
+                            <div class="timeline-header">
+                                <div>
+                                    <div class="timeline-category-name">${item.category}</div>
+                                    <div class="timeline-bateria">🏃 Bateria ${item.bateria}</div>
+                                </div>
+                                <button class="timeline-expand-btn" onclick="toggleTimelineDetails('${teamKey}')">
+                                    ${isExpanded ? '−' : '+'}
+                                </button>
+                            </div>
+                            <div class="timeline-details ${isExpanded ? 'show' : ''}">
+                                <div class="timeline-athlete">👤 Atleta 1: ${item.atleta1 || 'N/A'}</div>
+                                <div class="timeline-athlete">👤 Atleta 2: ${item.atleta2 || 'N/A'}</div>
+                            </div>
                         </div>
                     `;
                 }
@@ -501,54 +617,13 @@
             });
         }
 
-        function formatTime(date) {
-            const hours = String(date.getHours()).padStart(2, '0');
-            const minutes = String(date.getMinutes()).padStart(2, '0');
-            return `${hours}:${minutes}`;
-        }
-
-        // RENDERIZAR TIMELINE
-        function renderTimeline() {
-            timelineData = generateTimeline();
-            const timelineHtml = document.getElementById('timelineContent');
-            timelineHtml.innerHTML = '';
-
-            timelineData.forEach(item => {
-                const div = document.createElement('div');
-                div.className = 'timeline-item';
-
-                let dotClass = '';
-                if (item.isPause) {
-                    dotClass = 'pause';
-                } else {
-                    const isCurrentOrUpcoming = true; // Lógica para determinar status
-                    dotClass = isCurrentOrUpcoming ? 'current' : 'done';
-                }
-
-                if (item.isPause) {
-                    div.innerHTML = `
-                        <div class="timeline-dot" style="background: #666;">☕</div>
-                        <div class="timeline-time">${item.time}</div>
-                        <div class="timeline-status">${item.content}</div>
-                    `;
-                } else {
-                    div.innerHTML = `
-                        <div class="timeline-dot ${dotClass}">${item.index + 1}</div>
-                        <div class="timeline-time">${item.time}</div>
-                        <div class="timeline-category">
-                            <div class="timeline-category-name">${item.category}</div>
-                            <div class="timeline-batches">🏃 ${item.batchesText}</div>
-                            <div class="timeline-status">⏱️ Duração: ${item.duration} minutos</div>
-                        </div>
-                    `;
-                }
-
-                timelineHtml.appendChild(div);
-            });
+        function toggleTimelineDetails(teamKey) {
+            expandedTeam = expandedTeam === teamKey ? null : teamKey;
+            renderTimelineFromData();
         }
 
         // BUSCAR E RENDERIZAR LEADERBOARD
-        async function fetchAndRenderLeaderboard() {
+        async function fetchLeaderboardData() {
             try {
                 const response = await fetch(getResultadosCSVUrl());
                 const csv = await response.text();
@@ -573,10 +648,38 @@
                     }
                 }
 
-                renderLeaderboard();
+                populateCategories();
+                updateLeaderboard();
             } catch (error) {
-                console.error('Erro ao carregar:', error);
+                console.error('Erro ao carregar leaderboard:', error);
             }
+        }
+
+        function populateCategories() {
+            const select = document.getElementById('categorySelect');
+            const currentValue = select.value;
+
+            while (select.options.length > 1) {
+                select.remove(1);
+            }
+
+            const categoriasComDados = new Set();
+            allData.forEach(item => {
+                if (item.categoria && item.status === "Finalizado") {
+                    categoriasComDados.add(item.categoria);
+                }
+            });
+
+            CATEGORIES.forEach(cat => {
+                if (categoriasComDados.has(cat)) {
+                    const option = document.createElement('option');
+                    option.value = cat;
+                    option.textContent = cat;
+                    select.appendChild(option);
+                }
+            });
+
+            select.value = currentValue;
         }
 
         function timeToSeconds(timeStr) {
@@ -594,18 +697,27 @@
             return Math.max(0, 100 - (position - 1) * 5);
         }
 
-        function renderLeaderboard() {
-            const finalizados = allData
-                .filter(row => row.status === "Finalizado")
-                .sort((a, b) => timeToSeconds(a.tempo) - timeToSeconds(b.tempo));
-
-            const naoFinalizados = allData
-                .filter(row => row.status !== "Finalizado");
-
-            const allRows = [...finalizados, ...naoFinalizados];
+        function updateLeaderboard() {
+            const categorySelect = document.getElementById('categorySelect');
+            const selectedCategory = categorySelect.value;
 
             const tbody = document.getElementById('leaderboardBody');
             const noData = document.getElementById('leaderboardNoData');
+
+            if (!selectedCategory) {
+                tbody.innerHTML = '';
+                noData.style.display = 'block';
+                return;
+            }
+
+            const finalizados = allData
+                .filter(row => row.categoria === selectedCategory && row.status === "Finalizado")
+                .sort((a, b) => timeToSeconds(a.tempo) - timeToSeconds(b.tempo));
+
+            const naoFinalizados = allData
+                .filter(row => row.categoria === selectedCategory && row.status !== "Finalizado");
+
+            const allRows = [...finalizados, ...naoFinalizados];
 
             if (allRows.length === 0) {
                 tbody.innerHTML = '';
@@ -646,31 +758,56 @@
                 tr.innerHTML = `
                     <td class="rank ${rankClass}">${rankDisplay}</td>
                     <td class="team-name">${row.equipe}</td>
-                    <td>${row.categoria}</td>
                     <td class="time">${row.tempo || '⏳'}</td>
                     <td class="points">${isFinalized ? points : '-'}</td>
                     <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+                    <td style="text-align: center;">
+                        <button class="timeline-expand-btn" onclick="toggleLeaderboardDetails(this, '${index}')">+</button>
+                    </td>
                 `;
+
+                // Adicionar linha de detalhes
+                const detailsTr = document.createElement('tr');
+                detailsTr.className = 'leaderboard-details';
+                detailsTr.innerHTML = `
+                    <td colspan="6">
+                        <div class="athlete-detail">👤 Atleta 1: ${row.atleta1}</div>
+                        <div class="athlete-detail">👤 Atleta 2: ${row.atleta2}</div>
+                    </td>
+                </tr>
+                `;
+
                 tbody.appendChild(tr);
+                tbody.appendChild(detailsTr);
+                tr.detailsRow = detailsTr;
+                tr.expandBtn = tr.querySelector('button');
             });
+        }
+
+        function toggleLeaderboardDetails(btn, index) {
+            const row = btn.closest('tr');
+            const detailsRow = row.nextElementSibling;
+
+            if (detailsRow && detailsRow.classList.contains('leaderboard-details')) {
+                detailsRow.classList.toggle('show');
+                btn.textContent = detailsRow.classList.contains('show') ? '−' : '+';
+            }
         }
 
         // SWITCH TABS
         function switchTab(tabName) {
-            // Ocultar todos
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
 
-            // Mostrar selecionado
             document.getElementById(tabName).classList.add('active');
             event.target.classList.add('active');
         }
 
         // INICIALIZAR
         window.onload = () => {
-            fetchTimelineFromCSV(); // Carregar timeline do CSV
-            fetchAndRenderLeaderboard();
-            setInterval(fetchAndRenderLeaderboard, 30 * 1000); // Atualizar a cada 30s
+            fetchTimelineFromCSV();
+            fetchLeaderboardData();
+            setInterval(fetchLeaderboardData, 30 * 1000);
         };
     </script>
 </body>
