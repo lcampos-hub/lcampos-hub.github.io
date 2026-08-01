@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🏆 INTER GAMES - A Batalha dos 100</title>
+    <title>🏆 INTER GAMES - Evento</title>
     <style>
         * {
             margin: 0;
@@ -46,48 +46,131 @@
             margin-bottom: 10px;
         }
 
-        .last-update {
-            font-size: 0.85em;
-            color: #A8D5A8;
-            font-weight: bold;
-        }
-
-        .controls {
+        /* TABS */
+        .tabs {
             display: flex;
-            justify-content: center;
             gap: 10px;
             margin-bottom: 25px;
+            border-bottom: 2px solid #FF5722;
             flex-wrap: wrap;
-            align-items: center;
         }
 
-        .control-label {
-            color: #FF5722;
-            font-weight: bold;
-            font-size: 0.9em;
-            text-transform: uppercase;
-        }
-
-        select {
-            padding: 10px 12px;
-            font-size: 0.9em;
-            border: 2px solid #FF5722;
+        .tab-btn {
             background: #2D2D2D;
+            border: 2px solid #FF5722;
             color: #FF5722;
-            border-radius: 3px;
+            padding: 12px 20px;
             cursor: pointer;
-            min-width: 180px;
             font-weight: bold;
+            border-radius: 3px 3px 0 0;
+            font-size: 0.95em;
+            transition: all 0.2s;
         }
 
-        select:focus {
-            outline: none;
-            box-shadow: 0 0 8px rgba(255, 87, 34, 0.5);
+        .tab-btn.active {
+            background: #FF5722;
+            color: #fff;
         }
 
-        /* Desktop: Tabela */
-        .table-container {
+        .tab-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .tab-content {
             display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* TIMELINE */
+        .timeline {
+            position: relative;
+            padding: 20px 0;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 30px;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: #FF5722;
+        }
+
+        .timeline-item {
+            margin-bottom: 30px;
+            padding-left: 100px;
+            position: relative;
+        }
+
+        .timeline-dot {
+            position: absolute;
+            left: 15px;
+            top: 5px;
+            width: 30px;
+            height: 30px;
+            background: #FF5722;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-weight: bold;
+            font-size: 0.8em;
+        }
+
+        .timeline-dot.current {
+            background: #00FF00;
+            box-shadow: 0 0 15px rgba(0, 255, 0, 0.5);
+        }
+
+        .timeline-dot.done {
+            background: #90EE90;
+        }
+
+        .timeline-time {
+            font-weight: bold;
+            font-size: 1.1em;
+            color: #FFD700;
+            margin-bottom: 5px;
+        }
+
+        .timeline-category {
+            background: rgba(255, 87, 34, 0.15);
+            border-left: 3px solid #FF5722;
+            padding: 12px;
+            border-radius: 3px;
+            margin-bottom: 8px;
+        }
+
+        .timeline-category-name {
+            color: #FF5722;
+            font-weight: bold;
+            font-size: 0.95em;
+        }
+
+        .timeline-batches {
+            font-size: 0.9em;
+            color: #A8D5A8;
+            margin-top: 5px;
+        }
+
+        .timeline-status {
+            font-size: 0.85em;
+            color: #999;
+            margin-top: 8px;
+            font-style: italic;
+        }
+
+        /* LEADERBOARD */
+        .leaderboard-container {
+            background: #2D2D2D;
+            border: 2px solid #FF5722;
+            border-radius: 5px;
+            overflow: hidden;
         }
 
         table {
@@ -110,7 +193,6 @@
 
         tbody tr {
             border-bottom: 1px solid #444;
-            cursor: pointer;
             transition: background-color 0.2s;
         }
 
@@ -122,196 +204,125 @@
             padding: 12px;
         }
 
-        /* Mobile: Cards */
-        .cards-container {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        .card {
-            background: #2D2D2D;
-            border: 2px solid #FF5722;
-            border-radius: 5px;
-            padding: 15px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .card:active {
-            background-color: rgba(255, 87, 34, 0.25);
-            transform: scale(0.98);
-        }
-
-        .card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-
-        .rank-badge {
-            display: flex;
-            align-items: center;
-            gap: 5px;
+        .rank {
             font-weight: bold;
+            font-size: 1.1em;
+            color: #FF5722;
+            text-align: center;
+        }
+
+        .rank.first {
+            color: #FFD700;
             font-size: 1.3em;
         }
 
-        .rank-badge.first {
-            color: #FFD700;
-        }
-
-        .rank-badge.second {
+        .rank.second {
             color: #C0C0C0;
         }
 
-        .rank-badge.third {
+        .rank.third {
             color: #CD7F32;
         }
 
-        .medal {
-            font-size: 1.2em;
-        }
-
-        .expand-btn {
-            background: #FF5722;
-            color: #fff;
-            border: none;
-            padding: 5px 10px;
-            border-radius: 3px;
-            cursor: pointer;
+        .team-name {
             font-weight: bold;
-            font-size: 0.9em;
-            transition: all 0.2s;
         }
 
-        .expand-btn:active {
-            background: #E64A19;
-        }
-
-        .card-title {
-            font-weight: bold;
-            font-size: 1.1em;
-            color: #FFF;
-            margin-bottom: 5px;
-        }
-
-        .card-subtitle {
-            color: #FF5722;
-            font-size: 0.9em;
-            margin-bottom: 10px;
-        }
-
-        .card-info {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-bottom: 10px;
-        }
-
-        .info-item {
-            background: rgba(255, 87, 34, 0.1);
-            padding: 8px;
-            border-radius: 3px;
-            border-left: 3px solid #FF5722;
-        }
-
-        .info-label {
-            font-size: 0.75em;
-            color: #999;
-            text-transform: uppercase;
-            margin-bottom: 3px;
-        }
-
-        .info-value {
-            font-weight: bold;
-            font-size: 0.95em;
+        .time {
             color: #A8D5A8;
-        }
-
-        .info-value.points {
-            color: #FFD700;
-        }
-
-        .card-details {
-            display: none;
-            margin-top: 15px;
-            padding-top: 15px;
-            border-top: 1px solid #444;
-        }
-
-        .card-details.show {
-            display: block;
-        }
-
-        .athletes-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-        }
-
-        .athlete {
-            background: rgba(255, 87, 34, 0.15);
-            padding: 10px;
-            border-radius: 3px;
-            border-left: 3px solid #FF5722;
-        }
-
-        .athlete-label {
-            font-size: 0.75em;
-            color: #999;
-            text-transform: uppercase;
-            margin-bottom: 3px;
-        }
-
-        .athlete-name {
             font-weight: bold;
-            font-size: 0.9em;
-            color: #FFF;
+        }
+
+        .points {
+            color: #FFD700;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 3px;
+            font-size: 0.85em;
+            font-weight: bold;
+        }
+
+        .status-finalizado {
+            background: #90EE90;
+            color: #000;
+        }
+
+        .status-aguardando {
+            background: #FFA500;
+            color: #000;
         }
 
         .no-data {
             text-align: center;
             padding: 40px 20px;
             color: #999;
-            font-size: 1em;
         }
 
-        .refresh-info {
-            text-align: center;
-            color: #999;
+        .event-info {
+            background: rgba(255, 87, 34, 0.1);
+            border: 1px solid #FF5722;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .event-info-item {
+            display: inline-block;
+            margin-right: 30px;
+            margin-bottom: 10px;
+        }
+
+        .event-info-label {
             font-size: 0.85em;
-            margin-top: 20px;
+            color: #999;
+            text-transform: uppercase;
         }
 
-        /* Responsivo */
-        @media (min-width: 1024px) {
-            h1 {
-                font-size: 2.2em;
+        .event-info-value {
+            font-weight: bold;
+            color: #FF5722;
+            font-size: 1.1em;
+        }
+
+        @media (max-width: 768px) {
+            .tabs {
+                flex-direction: column;
             }
 
-            .table-container {
+            .tab-btn {
+                width: 100%;
+            }
+
+            .timeline::before {
+                left: 20px;
+            }
+
+            .timeline-item {
+                padding-left: 80px;
+            }
+
+            .timeline-dot {
+                left: 5px;
+                width: 25px;
+                height: 25px;
+            }
+
+            table {
+                font-size: 0.9em;
+            }
+
+            th, td {
+                padding: 8px;
+            }
+
+            .event-info-item {
                 display: block;
-            }
-
-            .cards-container {
-                display: none;
-            }
-        }
-
-        @media (max-width: 600px) {
-            .athletes-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .control-label {
-                width: 100%;
-            }
-
-            select {
-                width: 100%;
-                min-width: unset;
+                margin-bottom: 15px;
             }
         }
     </style>
@@ -319,100 +330,235 @@
 <body>
     <div class="container">
         <header>
-            <h1>🏆 INTER GAMES</h1>
+            <h1>🏆 INTER GAMES experience</h1>
             <h2 class="subtitle">A Batalha dos 100 - Roque Box Goiânia</h2>
-            <div class="last-update" id="lastUpdate">⏳ Carregando dados...</div>
         </header>
 
-        <div class="controls">
-            <label class="control-label">Categoria:</label>
-            <select id="categorySelect" onchange="updateDisplay()">
-                <option value="">-- Todas --</option>
-            </select>
+        <!-- TABS -->
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('timeline')">📅 Timeline</button>
+            <button class="tab-btn" onclick="switchTab('leaderboard')">🏅 Leaderboard</button>
         </div>
 
-        <!-- VERSÃO DESKTOP: TABELA -->
-        <div class="table-container">
-            <table id="rankingTable">
-                <thead>
-                    <tr>
-                        <th style="width: 8%;">Rank</th>
-                        <th style="width: 35%;">Equipe</th>
-                        <th style="width: 25%;">Tempo</th>
-                        <th style="width: 12%;">Pontos</th>
-                        <th style="width: 5%; text-align: center;">+</th>
-                    </tr>
-                </thead>
-                <tbody id="tableBody">
-                </tbody>
-            </table>
+        <!-- TAB: TIMELINE -->
+        <div id="timeline" class="tab-content active">
+            <div class="event-info">
+                <div class="event-info-item">
+                    <div class="event-info-label">Data</div>
+                    <div class="event-info-value">02 de Agosto de 2026</div>
+                </div>
+                <div class="event-info-item">
+                    <div class="event-info-label">Local</div>
+                    <div class="event-info-value">Roque Box Goiânia</div>
+                </div>
+                <div class="event-info-item">
+                    <div class="event-info-label">Total de Duplas</div>
+                    <div class="event-info-value">21</div>
+                </div>
+                <div class="event-info-item">
+                    <div class="event-info-label">Duração Prova</div>
+                    <div class="event-info-value">~50 min</div>
+                </div>
+            </div>
+
+            <div class="timeline" id="timelineContent"></div>
         </div>
 
-        <!-- VERSÃO MOBILE: CARDS -->
-        <div id="cardsContainer" class="cards-container">
-        </div>
+        <!-- TAB: LEADERBOARD -->
+        <div id="leaderboard" class="tab-content">
+            <div class="leaderboard-container">
+                <table id="leaderboardTable">
+                    <thead>
+                        <tr>
+                            <th style="width: 8%;">Rank</th>
+                            <th style="width: 30%;">Equipe</th>
+                            <th style="width: 20%;">Categoria</th>
+                            <th style="width: 15%;">Tempo</th>
+                            <th style="width: 12%;">Pontos</th>
+                            <th style="width: 15%;">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leaderboardBody">
+                    </tbody>
+                </table>
 
-        <div id="noData" class="no-data" style="display:none;">
-            📋 Nenhum resultado finalizado ainda
-        </div>
-
-        <div class="refresh-info">
-            🔄 Atualiza a cada 30 segundos
+                <div id="leaderboardNoData" class="no-data" style="display:none;">
+                    📋 Nenhum resultado ainda
+                </div>
+            </div>
         </div>
     </div>
 
     <script>
-        // URL do CSV publicado com cache busting
-        function getCSVUrl() {
+        // URL do CSV com cache busting - ABA TIMELINE
+        function getTimelineCSVUrl() {
+            const baseUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSJ8rMHFvBx4d4nC7sytJYKZ4RXIJdzktA4EgyG_LAiYiIXh_Sv6GFO9DUXQNJIgQ/pub?gid=1612636754&single=true&output=csv';
+            const timestamp = new Date().getTime();
+            return `${baseUrl}&t=${timestamp}`;
+        }
+
+        // URL do CSV com cache busting - ABA RESULTADOS
+        function getResultadosCSVUrl() {
             const baseUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSJ8rMHFvBx4d4nC7sytJYKZ4RXIJdzktA4EgyG_LAiYiIXh_Sv6GFO9DUXQNJIgQ/pub?gid=259301029&single=true&output=csv';
             const timestamp = new Date().getTime();
             return `${baseUrl}&t=${timestamp}`;
         }
-        
+
         const CATEGORIES = [
-            "Full Feminino",
             "Full Masculino",
-            "Full Misto",
-            "Revezamento Feminino",
             "Revezamento Masculino",
-            "Revezamento Misto",
-            "Short Feminino",
             "Short Masculino",
+            "Full Misto",
+            "Revezamento Misto",
             "Short Misto",
+            "Full Feminino",
+            "Revezamento Feminino",
+            "Short Feminino",
             "Kids"
         ];
 
         let allData = [];
+        let timelineData = [];
 
-        // Converter tempo MM:SS em segundos
-        function timeToSeconds(timeStr) {
-            if (!timeStr) return Infinity;
-            const parts = timeStr.split(':');
-            const minutes = parseInt(parts[0]) || 0;
-            const seconds = parseInt(parts[1]) || 0;
-            return minutes * 60 + seconds;
-        }
-
-        // Calcular pontos
-        function calculatePoints(position) {
-            if (position === 1) return 100;
-            if (position === 2) return 95;
-            if (position === 3) return 90;
-            return Math.max(0, 100 - (position - 1) * 5);
-        }
-
-        // Buscar dados
-        async function fetchData() {
+        // GERAR TIMELINE A PARTIR DO CSV
+        async function fetchTimelineFromCSV() {
             try {
-                const response = await fetch(getCSVUrl());
+                const response = await fetch(getTimelineCSVUrl());
                 const csv = await response.text();
-                
                 const lines = csv.split('\n');
-                allData = [];
-                
+
+                timelineData = [];
+                let index = 0;
+
+                // Pular header (linha 0)
                 for (let i = 1; i < lines.length; i++) {
                     if (lines[i].trim() === '') continue;
-                    
+
+                    const parts = lines[i].split(',');
+                    if (parts.length >= 2 && parts[0]) {
+                        const horario = parts[0].trim();
+                        const descricao = parts[1].trim();
+                        const categoria = parts[2] ? parts[2].trim() : '';
+                        const baterias = parts[3] ? parts[3].trim() : '';
+                        const intervalo = parts[4] ? parts[4].trim() : '';
+
+                        const isPause = descricao.toLowerCase().includes('intervalo') || intervalo.toLowerCase().includes('sim');
+
+                        if (isPause) {
+                            timelineData.push({
+                                time: horario,
+                                content: descricao,
+                                isPause: true,
+                                index: index++
+                            });
+                        } else {
+                            timelineData.push({
+                                time: horario,
+                                category: categoria || descricao,
+                                batchesText: baterias || 'Dados não informados',
+                                isPause: false,
+                                index: index++
+                            });
+                        }
+                    }
+                }
+
+                renderTimelineFromData();
+            } catch (error) {
+                console.error('Erro ao carregar timeline:', error);
+                // Se falhar, usar timeline padrão
+                timelineData = generateTimeline();
+                renderTimelineFromData();
+            }
+        }
+
+        function renderTimelineFromData() {
+            const timelineHtml = document.getElementById('timelineContent');
+            timelineHtml.innerHTML = '';
+
+            timelineData.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'timeline-item';
+
+                if (item.isPause) {
+                    div.innerHTML = `
+                        <div class="timeline-dot" style="background: #666;">☕</div>
+                        <div class="timeline-time">${item.time}</div>
+                        <div class="timeline-status">${item.content}</div>
+                    `;
+                } else {
+                    div.innerHTML = `
+                        <div class="timeline-dot current">${item.index + 1}</div>
+                        <div class="timeline-time">${item.time}</div>
+                        <div class="timeline-category">
+                            <div class="timeline-category-name">${item.category}</div>
+                            <div class="timeline-batches">🏃 ${item.batchesText}</div>
+                        </div>
+                    `;
+                }
+
+                timelineHtml.appendChild(div);
+            });
+        }
+
+        function formatTime(date) {
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            return `${hours}:${minutes}`;
+        }
+
+        // RENDERIZAR TIMELINE
+        function renderTimeline() {
+            timelineData = generateTimeline();
+            const timelineHtml = document.getElementById('timelineContent');
+            timelineHtml.innerHTML = '';
+
+            timelineData.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'timeline-item';
+
+                let dotClass = '';
+                if (item.isPause) {
+                    dotClass = 'pause';
+                } else {
+                    const isCurrentOrUpcoming = true; // Lógica para determinar status
+                    dotClass = isCurrentOrUpcoming ? 'current' : 'done';
+                }
+
+                if (item.isPause) {
+                    div.innerHTML = `
+                        <div class="timeline-dot" style="background: #666;">☕</div>
+                        <div class="timeline-time">${item.time}</div>
+                        <div class="timeline-status">${item.content}</div>
+                    `;
+                } else {
+                    div.innerHTML = `
+                        <div class="timeline-dot ${dotClass}">${item.index + 1}</div>
+                        <div class="timeline-time">${item.time}</div>
+                        <div class="timeline-category">
+                            <div class="timeline-category-name">${item.category}</div>
+                            <div class="timeline-batches">🏃 ${item.batchesText}</div>
+                            <div class="timeline-status">⏱️ Duração: ${item.duration} minutos</div>
+                        </div>
+                    `;
+                }
+
+                timelineHtml.appendChild(div);
+            });
+        }
+
+        // BUSCAR E RENDERIZAR LEADERBOARD
+        async function fetchAndRenderLeaderboard() {
+            try {
+                const response = await fetch(getResultadosCSVUrl());
+                const csv = await response.text();
+
+                const lines = csv.split('\n');
+                allData = [];
+
+                for (let i = 1; i < lines.length; i++) {
+                    if (lines[i].trim() === '') continue;
+
                     const parts = lines[i].split(',');
                     if (parts.length >= 5 && parts[0]) {
                         allData.push({
@@ -426,190 +572,106 @@
                         });
                     }
                 }
-                
-                populateDropdown();
-                updateLastModified();
-                
+
+                renderLeaderboard();
             } catch (error) {
-                console.error('Erro:', error);
-                document.getElementById('lastUpdate').textContent = `❌ Erro ao carregar`;
+                console.error('Erro ao carregar:', error);
             }
         }
 
-        // Preencher dropdown
-        function populateDropdown() {
-            const select = document.getElementById('categorySelect');
-            const currentValue = select.value;
-            
-            while (select.options.length > 1) {
-                select.remove(1);
-            }
-
-            const categoriasComDados = new Set();
-            allData.forEach(item => {
-                if (item.categoria && item.status === "Finalizado") {
-                    categoriasComDados.add(item.categoria);
-                }
-            });
-
-            CATEGORIES.forEach(cat => {
-                if (categoriasComDados.has(cat)) {
-                    const option = document.createElement('option');
-                    option.value = cat;
-                    option.textContent = cat;
-                    select.appendChild(option);
-                }
-            });
-
-            select.value = currentValue;
+        function timeToSeconds(timeStr) {
+            if (!timeStr) return Infinity;
+            const parts = timeStr.split(':');
+            const minutes = parseInt(parts[0]) || 0;
+            const seconds = parseInt(parts[1]) || 0;
+            return minutes * 60 + seconds;
         }
 
-        // Atualizar display
-        function updateDisplay() {
-            const categorySelect = document.getElementById('categorySelect');
-            const selectedCategory = categorySelect.value;
+        function calculatePoints(position) {
+            if (position === 1) return 100;
+            if (position === 2) return 95;
+            if (position === 3) return 90;
+            return Math.max(0, 100 - (position - 1) * 5);
+        }
 
-            let allDataForDisplay = allData; // TODOS os dados
-
-            if (selectedCategory) {
-                allDataForDisplay = allDataForDisplay.filter(row => row.categoria === selectedCategory);
-            }
-
-            // Separar: Finalizados e Não Finalizados
-            const finalizados = allDataForDisplay
+        function renderLeaderboard() {
+            const finalizados = allData
                 .filter(row => row.status === "Finalizado")
                 .sort((a, b) => timeToSeconds(a.tempo) - timeToSeconds(b.tempo));
 
-            const naoFinalizados = allDataForDisplay
+            const naoFinalizados = allData
                 .filter(row => row.status !== "Finalizado");
 
-            // Combinar: Finalizados primeiro, depois não finalizados
-            const categoryData = [...finalizados, ...naoFinalizados];
+            const allRows = [...finalizados, ...naoFinalizados];
 
-            const tableBody = document.getElementById('tableBody');
-            const cardsContainer = document.getElementById('cardsContainer');
-            const noData = document.getElementById('noData');
+            const tbody = document.getElementById('leaderboardBody');
+            const noData = document.getElementById('leaderboardNoData');
 
-            if (categoryData.length === 0) {
-                tableBody.innerHTML = '';
-                cardsContainer.innerHTML = '';
+            if (allRows.length === 0) {
+                tbody.innerHTML = '';
                 noData.style.display = 'block';
                 return;
             }
 
             noData.style.display = 'none';
-            tableBody.innerHTML = '';
-            cardsContainer.innerHTML = '';
+            tbody.innerHTML = '';
 
-            categoryData.forEach((row, index) => {
-                // Só é "colocação" se for Finalizado
+            allRows.forEach((row, index) => {
                 const isFinalized = row.status === "Finalizado";
                 const position = isFinalized ? finalizados.indexOf(row) + 1 : null;
                 const points = isFinalized ? calculatePoints(position) : 0;
-                
-                let medal = '';
+
+                let rankDisplay = '-';
                 let rankClass = '';
-                let displayPosition = '';
+                let medal = '';
 
                 if (isFinalized) {
                     if (position === 1) {
-                        medal = '🥇';
+                        medal = '🥇 ';
                         rankClass = 'first';
                     } else if (position === 2) {
-                        medal = '🥈';
+                        medal = '🥈 ';
                         rankClass = 'second';
                     } else if (position === 3) {
-                        medal = '🥉';
+                        medal = '🥉 ';
                         rankClass = 'third';
                     }
-                    displayPosition = `<span class="medal">${medal}</span>${position}`;
-                } else {
-                    displayPosition = '-';
+                    rankDisplay = medal + position;
                 }
 
-                // VERSÃO DESKTOP
-                const mainRow = document.createElement('tr');
-                mainRow.innerHTML = `
-                    <td class="rank ${rankClass}">
-                        ${displayPosition}
-                    </td>
-                    <td>
-                        <div class="team-name">${row.equipe}</div>
-                        <div class="category">${row.categoria}</div>
-                    </td>
-                    <td class="time">${row.tempo ? '⏱️ ' + row.tempo : '-'}</td>
-                    <td class="points">${isFinalized ? points : '-'}</td>
-                    <td style="text-align: center;">
-                        <span class="expand-icon" onclick="toggleDetails(event, this)">▼</span>
-                    </td>
-                `;
-                tableBody.appendChild(mainRow);
+                const statusClass = isFinalized ? 'status-finalizado' : 'status-aguardando';
+                const statusText = isFinalized ? 'Finalizado' : 'Aguardando';
 
-                // VERSÃO MOBILE: CARD
-                const card = document.createElement('div');
-                card.className = 'card';
-                card.innerHTML = `
-                    <div class="card-header">
-                        <div class="rank-badge ${rankClass}">
-                            ${isFinalized ? `<span class="medal">${medal}</span>${position}º` : '⏳'}
-                        </div>
-                        <button class="expand-btn" onclick="toggleCard(this)">+ Info</button>
-                    </div>
-                    <div class="card-title">${row.equipe}</div>
-                    <div class="card-subtitle">${row.categoria}</div>
-                    <div class="card-info">
-                        <div class="info-item">
-                            <div class="info-label">Tempo</div>
-                            <div class="info-value">${row.tempo ? '⏱️ ' + row.tempo : '⏳ Aguardando'}</div>
-                        </div>
-                        <div class="info-item">
-                            <div class="info-label">Pontos</div>
-                            <div class="info-value points">${isFinalized ? '⭐ ' + points : '⏳'}</div>
-                        </div>
-                    </div>
-                    <div class="card-details">
-                        <div class="athletes-grid">
-                            <div class="athlete">
-                                <div class="athlete-label">Atleta 1</div>
-                                <div class="athlete-name">${row.atleta1}</div>
-                            </div>
-                            <div class="athlete">
-                                <div class="athlete-label">Atleta 2</div>
-                                <div class="athlete-name">${row.atleta2}</div>
-                            </div>
-                        </div>
-                        <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #444; font-size: 0.85em; color: #FF5722;">
-                            Status: <strong>${row.status}</strong>
-                        </div>
-                    </div>
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="rank ${rankClass}">${rankDisplay}</td>
+                    <td class="team-name">${row.equipe}</td>
+                    <td>${row.categoria}</td>
+                    <td class="time">${row.tempo || '⏳'}</td>
+                    <td class="points">${isFinalized ? points : '-'}</td>
+                    <td><span class="status-badge ${statusClass}">${statusText}</span></td>
                 `;
-                cardsContainer.appendChild(card);
+                tbody.appendChild(tr);
             });
         }
 
-        // Toggle card
-        function toggleCard(btn) {
-            const card = btn.closest('.card');
-            const details = card.querySelector('.card-details');
-            details.classList.toggle('show');
-            btn.textContent = details.classList.contains('show') ? '- Info' : '+ Info';
+        // SWITCH TABS
+        function switchTab(tabName) {
+            // Ocultar todos
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+
+            // Mostrar selecionado
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
         }
 
-        // Toggle detalhes (desktop)
-        function toggleDetails(event, icon) {
-            // Implementação para desktop se necessário
-        }
-
-        // Atualizar hora
-        function updateLastModified() {
-            const now = new Date();
-            const time = now.toLocaleTimeString('pt-BR');
-            document.getElementById('lastUpdate').textContent = `✅ Atualizado em ${time}`;
-        }
-
-        // Inicializar
-        fetchData();
-        setInterval(fetchData, 30 * 1000);
+        // INICIALIZAR
+        window.onload = () => {
+            fetchTimelineFromCSV(); // Carregar timeline do CSV
+            fetchAndRenderLeaderboard();
+            setInterval(fetchAndRenderLeaderboard, 30 * 1000); // Atualizar a cada 30s
+        };
     </script>
 </body>
 </html>
