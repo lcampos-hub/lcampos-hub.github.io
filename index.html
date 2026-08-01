@@ -84,122 +84,95 @@
             display: block;
         }
 
-        /* TIMELINE */
-        .timeline {
-            position: relative;
-            padding: 20px 0;
+        /* TIMELINE TABLE */
+        .timeline-table-container {
+            background: #2D2D2D;
+            border: 2px solid #FF5722;
+            border-radius: 5px;
+            overflow-x: auto;
+            overflow-y: hidden;
         }
 
-        .timeline::before {
-            content: '';
-            position: absolute;
-            left: 30px;
-            top: 0;
-            bottom: 0;
-            width: 3px;
+        .timeline-table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+        }
+
+        .timeline-table thead {
             background: #FF5722;
-        }
-
-        .timeline-item {
-            margin-bottom: 25px;
-            padding-left: 100px;
-            position: relative;
-        }
-
-        .timeline-dot {
-            position: absolute;
-            left: 15px;
-            top: 5px;
-            width: 30px;
-            height: 30px;
-            background: #FF5722;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
             color: #fff;
+            text-transform: uppercase;
             font-weight: bold;
-            font-size: 0.8em;
-        }
-
-        .timeline-dot.current {
-            background: #90EE90;
-            box-shadow: 0 0 15px rgba(0, 255, 0, 0.5);
-        }
-
-        .timeline-dot.done {
-            background: #90EE90;
-        }
-
-        .timeline-time {
-            font-weight: bold;
-            font-size: 1.1em;
-            color: #FFD700;
-            margin-bottom: 5px;
-        }
-
-        .timeline-content {
-            background: rgba(255, 87, 34, 0.15);
-            border-left: 3px solid #FF5722;
-            padding: 12px;
-            border-radius: 3px;
-        }
-
-        .timeline-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 8px;
-        }
-
-        .timeline-category-name {
-            color: #FF5722;
-            font-weight: bold;
-            font-size: 0.95em;
-        }
-
-        .timeline-bateria {
-            color: #A8D5A8;
             font-size: 0.85em;
         }
 
-        .timeline-expand-btn {
+        .timeline-table th {
+            padding: 12px;
+            text-align: left;
+            font-size: 0.75em;
+        }
+
+        .timeline-table tbody tr {
+            border-bottom: 1px solid #444;
+            transition: background-color 0.2s;
+            cursor: pointer;
+        }
+
+        .timeline-table tbody tr:hover {
+            background-color: rgba(255, 87, 34, 0.15);
+        }
+
+        .timeline-table td {
+            padding: 10px 8px;
+            word-break: break-word;
+            font-size: 0.9em;
+        }
+
+        .timeline-equipe {
+            font-weight: bold;
+            color: #FF5722;
+        }
+
+        .timeline-horario {
+            color: #FFD700;
+            font-weight: bold;
+        }
+
+        .timeline-bateria-col {
+            color: #A8D5A8;
+        }
+
+        .timeline-expand-table-btn {
             background: #FF5722;
             color: #fff;
             border: none;
             padding: 4px 8px;
             border-radius: 3px;
             cursor: pointer;
-            font-size: 0.8em;
+            font-size: 0.85em;
             font-weight: bold;
         }
 
-        .timeline-expand-btn:hover {
+        .timeline-expand-table-btn:hover {
             background: #E64A19;
         }
 
-        .timeline-details {
+        .timeline-row-details {
             display: none;
-            margin-top: 10px;
-            padding-top: 10px;
-            border-top: 1px solid #FF5722;
-            font-size: 0.9em;
+            background: rgba(255, 87, 34, 0.1);
+            padding: 12px;
+            border-left: 3px solid #FF5722;
         }
 
-        .timeline-details.show {
+        .timeline-row-details.show {
             display: block;
         }
 
-        .timeline-athlete {
+        .timeline-athlete-detail {
             color: #A8D5A8;
+            font-size: 0.9em;
             margin: 5px 0;
-        }
-
-        .timeline-status {
-            font-size: 0.85em;
-            color: #999;
-            margin-top: 8px;
-            font-style: italic;
         }
 
         /* LEADERBOARD */
@@ -238,12 +211,14 @@
             background: #2D2D2D;
             border: 2px solid #FF5722;
             border-radius: 5px;
-            overflow: hidden;
+            overflow-x: auto;
+            overflow-y: hidden;
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
+            table-layout: fixed;
         }
 
         thead {
@@ -257,6 +232,7 @@
         th {
             padding: 12px;
             text-align: left;
+            font-size: 0.75em;
         }
 
         tbody tr {
@@ -270,7 +246,9 @@
         }
 
         td {
-            padding: 12px;
+            padding: 10px 8px;
+            word-break: break-word;
+            font-size: 0.9em;
         }
 
         .rank {
@@ -401,11 +379,17 @@
             }
 
             table {
-                font-size: 0.9em;
+                font-size: 0.85em;
+                min-width: 500px;
             }
 
-            th, td {
-                padding: 8px;
+            th {
+                padding: 8px 4px;
+                font-size: 0.7em;
+            }
+
+            td {
+                padding: 8px 4px;
             }
 
             .event-info-item {
@@ -420,6 +404,11 @@
 
             select {
                 width: 100%;
+            }
+
+            .leaderboard-container {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
             }
         }
     </style>
@@ -454,7 +443,21 @@
                 </div>
             </div>
 
-            <div class="timeline" id="timelineContent"></div>
+            <div class="timeline-table-container">
+                <table class="timeline-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 12%;">Horário</th>
+                            <th style="width: 30%;">Equipe</th>
+                            <th style="width: 15%;">Categoria</th>
+                            <th style="width: 12%;">Bateria</th>
+                            <th style="width: 5%; text-align: center;">+</th>
+                        </tr>
+                    </thead>
+                    <tbody id="timelineContent">
+                    </tbody>
+                </table>
+            </div>
         </div>
 
         <!-- TAB: LEADERBOARD -->
@@ -580,42 +583,47 @@
             const timelineHtml = document.getElementById('timelineContent');
             timelineHtml.innerHTML = '';
 
-            timelineData.forEach(item => {
-                const div = document.createElement('div');
-                div.className = 'timeline-item';
-
+            timelineData.forEach((item, index) => {
                 if (item.isPause) {
-                    div.innerHTML = `
-                        <div class="timeline-dot" style="background: #666;">☕</div>
-                        <div class="timeline-time">${item.time}</div>
-                        <div class="timeline-status">${item.content}</div>
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td colspan="5" style="text-align: center; background: #333; color: #FFD700; font-weight: bold;">
+                            ☕ ${item.content}
+                        </td>
                     `;
+                    timelineHtml.appendChild(tr);
                 } else {
-                    const teamKey = `${item.nomeEquipe}-${item.index}`;
+                    const teamKey = `${item.nomeEquipe}-${index}`;
                     const isExpanded = expandedTeam === teamKey;
 
-                    div.innerHTML = `
-                        <div class="timeline-dot current">${item.index + 1}</div>
-                        <div class="timeline-time">${item.time}</div>
-                        <div class="timeline-content">
-                            <div class="timeline-header">
-                                <div>
-                                    <div class="timeline-category-name">${item.nomeEquipe}</div>
-                                    <div class="timeline-bateria">🏃 Bateria ${item.bateria}</div>
-                                </div>
-                                <button class="timeline-expand-btn" onclick="toggleTimelineDetails('${teamKey}')">
-                                    ${isExpanded ? '−' : '+'}
-                                </button>
-                            </div>
-                            <div class="timeline-details ${isExpanded ? 'show' : ''}">
-                                <div class="timeline-athlete">👤 Atleta 1: ${item.atleta1}</div>
-                                <div class="timeline-athlete">👤 Atleta 2: ${item.atleta2}</div>
-                            </div>
-                        </div>
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td class="timeline-horario">${item.time}</td>
+                        <td class="timeline-equipe">${item.nomeEquipe}</td>
+                        <td>${item.category}</td>
+                        <td class="timeline-bateria-col">${item.bateria}</td>
+                        <td style="text-align: center;">
+                            <button class="timeline-expand-table-btn" onclick="toggleTimelineDetails('${teamKey}')">
+                                ${isExpanded ? '−' : '+'}
+                            </button>
+                        </td>
                     `;
-                }
+                    timelineHtml.appendChild(tr);
 
-                timelineHtml.appendChild(div);
+                    // Adicionar linha de detalhes
+                    if (isExpanded) {
+                        const detailsTr = document.createElement('tr');
+                        detailsTr.className = 'timeline-row-details show';
+                        detailsTr.innerHTML = `
+                            <td colspan="5">
+                                <div class="timeline-athlete-detail">👤 Atleta 1: ${item.atleta1}</div>
+                                <div class="timeline-athlete-detail">👤 Atleta 2: ${item.atleta2}</div>
+                            </td>
+                        </tr>
+                        `;
+                        timelineHtml.appendChild(detailsTr);
+                    }
+                }
             });
         }
 
