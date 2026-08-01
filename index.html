@@ -644,12 +644,14 @@
                     const isExpanded = expandedTeam === teamKey;
 
                     const tr = document.createElement('tr');
+                    tr.style.cursor = 'pointer';
+                    tr.onclick = () => toggleTimelineDetails(teamKey);
                     tr.innerHTML = `
                         <td class="timeline-horario">${item.time}</td>
                         <td class="timeline-equipe">${item.nomeEquipe}</td>
                         <td>${item.category}</td>
                         <td class="timeline-bateria-col">${item.bateria}</td>
-                        <td style="text-align: center;">
+                        <td style="text-align: center;" onclick="event.stopPropagation();">
                             <button class="timeline-expand-table-btn" onclick="toggleTimelineDetails('${teamKey}')">
                                 ${isExpanded ? '−' : '+'}
                             </button>
