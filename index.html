@@ -538,12 +538,13 @@
                     const parts = lines[i].split(',');
                     if (parts.length >= 2 && parts[0]) {
                         const horario = parts[0].trim();
-                        const descricao = parts[1].trim();
+                        const nomeEquipe = parts[1].trim();
                         const categoria = parts[2] ? parts[2].trim() : '';
-                        const bateria = parts[3] ? parts[3].trim() : '';
-                        const atleta1 = parts[4] ? parts[4].trim() : '';
-                        const atleta2 = parts[5] ? parts[5].trim() : '';
+                        const atleta1 = parts[3] ? parts[3].trim() : '';
+                        const atleta2 = parts[4] ? parts[4].trim() : '';
+                        const bateria = parts[5] ? parts[5].trim() : '';
                         const intervalo = parts[6] ? parts[6].trim() : '';
+                        const descricao = nomeEquipe;
 
                         const isPause = descricao.toLowerCase().includes('intervalo') || intervalo.toLowerCase().includes('sim');
 
@@ -557,10 +558,11 @@
                         } else {
                             timelineData.push({
                                 time: horario,
-                                category: categoria || descricao,
+                                nomeEquipe: descricao,
+                                category: categoria || 'N/A',
                                 bateria: bateria || 'N/A',
-                                atleta1: atleta1,
-                                atleta2: atleta2,
+                                atleta1: atleta1 || 'N/A',
+                                atleta2: atleta2 || 'N/A',
                                 isPause: false,
                                 index: index++
                             });
@@ -589,7 +591,7 @@
                         <div class="timeline-status">${item.content}</div>
                     `;
                 } else {
-                    const teamKey = `${item.category}-${item.index}`;
+                    const teamKey = `${item.nomeEquipe}-${item.index}`;
                     const isExpanded = expandedTeam === teamKey;
 
                     div.innerHTML = `
@@ -598,7 +600,7 @@
                         <div class="timeline-content">
                             <div class="timeline-header">
                                 <div>
-                                    <div class="timeline-category-name">${item.category}</div>
+                                    <div class="timeline-category-name">${item.nomeEquipe}</div>
                                     <div class="timeline-bateria">🏃 Bateria ${item.bateria}</div>
                                 </div>
                                 <button class="timeline-expand-btn" onclick="toggleTimelineDetails('${teamKey}')">
@@ -606,8 +608,8 @@
                                 </button>
                             </div>
                             <div class="timeline-details ${isExpanded ? 'show' : ''}">
-                                <div class="timeline-athlete">👤 Atleta 1: ${item.atleta1 || 'N/A'}</div>
-                                <div class="timeline-athlete">👤 Atleta 2: ${item.atleta2 || 'N/A'}</div>
+                                <div class="timeline-athlete">👤 Atleta 1: ${item.atleta1}</div>
+                                <div class="timeline-athlete">👤 Atleta 2: ${item.atleta2}</div>
                             </div>
                         </div>
                     `;
