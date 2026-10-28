@@ -54,6 +54,10 @@
   .copia { background: var(--campo); border: 1px dashed var(--borda); border-radius: 10px; padding: 10px; font-size: .8rem; word-break: break-all; color: var(--texto); margin: 6px 0 8px; max-height: 96px; overflow: auto; }
   .upload { display: block; border: 2px dashed var(--borda); border-radius: 12px; padding: 22px 12px; text-align: center; cursor: pointer; color: var(--sub); margin: 0 0 14px; font-weight: 600; }
   .upload small { display: block; font-weight: 400; font-size: .8rem; margin-top: 4px; }
+  .upload-rotulo { font-size: .85rem; font-weight: 600; color: var(--texto); margin: 12px 0 6px; }
+  .opcoes { margin: 10px 0 0 18px; color: var(--sub); font-size: .9rem; }
+  .opcoes li + li { margin-top: 6px; }
+  #upload-intro { margin: 4px 0 4px; }
   .upload.tem { border-color: var(--ok); color: var(--ok); }
   .link-volta { word-break: break-all; font-size: .85rem; }
   .spinner { width: 40px; height: 40px; border: 4px solid var(--borda); border-top-color: var(--laranja); border-radius: 50%; animation: gira 0.8s linear infinite; margin: 50px auto 14px; }
@@ -142,7 +146,8 @@
       <div class="valor mt" id="p-valor"></div>
     </div>
 
-    <div class="alerta info hidden" id="p-analise">Já recebemos um comprovante desta inscrição. Envie outro só se a organização pedir.</div>
+    <div class="alerta info hidden" id="p-lote-aviso"></div>
+    <div class="alerta info hidden" id="p-analise"></div>
     <div class="alerta info" id="p-expira-box"><span id="p-expira"></span></div>
 
     <div class="card">
@@ -166,7 +171,16 @@
       </div>
 
       <div id="pane-cartao" class="hidden">
-        <p class="sub">Você será levado ao link de pagamento. Pague o valor de <strong id="c-valor-cartao"></strong>.</p>
+        <div id="cartao-individual">
+          <p class="sub">Você será levado ao link de pagamento. Pague o valor de <strong id="c-valor-cartao"></strong>.</p>
+        </div>
+        <div id="cartao-dupla" class="hidden">
+          <p class="sub">No cartão, o valor é <strong>por atleta</strong>: <strong id="c-valor-atleta"></strong> cada (total <span id="c-valor-total"></span>). Escolha como a dupla vai pagar:</p>
+          <ul class="opcoes">
+            <li><strong>Cada um paga a sua parte:</strong> os dois usam o mesmo link, cada um com o seu cartão.</li>
+            <li><strong>Um atleta paga tudo:</strong> use o link 2 vezes.</li>
+          </ul>
+        </div>
         <a class="btn mt" id="btn-cartao" target="_blank" rel="noopener">Pagar com cartão</a>
         <p class="sub mt">Depois de pagar, tire um print da tela de pagamento aprovado e volte aqui para enviar o comprovante.</p>
       </div>
@@ -174,11 +188,8 @@
 
     <div class="card" id="card-comprovante">
       <h2>2. Envie o comprovante</h2>
-      <label class="upload" id="upload" for="arquivo">
-        <span id="upload-txt">Toque para anexar o comprovante</span>
-        <small id="upload-dica">Foto, print ou PDF</small>
-      </label>
-      <input type="file" id="arquivo" accept="image/*,application/pdf" class="hidden">
+      <p class="sub hidden" id="upload-intro">Anexe os 2 comprovantes do cartão. Se o outro atleta ainda vai pagar, envie só o seu agora: ele manda o dele depois pelo link no fim da página, com o CPF dele.</p>
+      <div id="uploads"></div>
       <div class="alerta erro hidden" id="p-erro"></div>
       <button class="btn" id="btn-enviar" type="button">Enviar comprovante</button>
     </div>
@@ -197,6 +208,7 @@
       <p class="sub mt">Vamos conferir seu pagamento. Assim que aprovado, sua inscrição fica <strong>confirmada</strong>.</p>
       <p class="sub mt">Seu código:</p>
       <div class="codigo" id="s-codigo"></div>
+      <div class="alerta info mt hidden" id="s-falta" style="text-align:left"></div>
       <p class="sub mt">Para acompanhar, use “Já me inscrevi” com esse código e seu CPF.</p>
     </div>
   </section>
@@ -222,12 +234,12 @@
 
 <script>
 /* ======= CONFIGURAÇÃO ======= */
-const API_URL = 'https://script.google.com/macros/s/AKfycbzx4xp5AavyoCT4ME0Nzo8E7FAofZMSw-o9EKtsAsxB3KuT6TCXu1NU0t8ynFdVxCTP/exec'; // termina em /exec
+const API_URL = 'https://script.google.com/macros/s/AKfycbzuIe-fcFB4OfEydJi2lNZ_LGyGjQ9vKAmg8tpZ5wotNWuxVG1zrTjmsTPV34OVZj60/exec'; // termina em /exec
 /* ============================ */
 
 const CAMISETAS = ['PP', 'P', 'M', 'G', 'GG', 'XGG'];
 const params = new URLSearchParams(location.search);
-let evento = null, inscricao = null, forma = 'Pix', comprovante = null, cpfTitular = '';
+let evento = null, inscricao = null, forma = 'Pix', comprovantes = [], cpfTitular = '';
 
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -336,7 +348,8 @@ function atualizarFormato() {
   $('campo-equipe').classList.toggle('hidden', !dupla);
   $('titulo-a1').textContent = dupla ? 'Atleta 1 (responsável)' : 'Atleta';
   $('valor-cat').classList.toggle('hidden', !f);
-  if (f) $('valor-cat').textContent = 'Valor da inscrição: ' + brl(dupla ? evento.valorDupla : evento.valorIndividual) + (dupla ? ' (por dupla)' : '');
+  const lote = evento.lote ? ` (${evento.lote}, até ${evento.loteAte})` : '';
+  if (f) $('valor-cat').textContent = `Valor da inscrição${lote}: ` + brl(dupla ? evento.valorDupla : evento.valorIndividual) + (dupla ? ' por dupla' : '');
   renderTermo();
 }
 
@@ -441,19 +454,25 @@ $('form').addEventListener('submit', async e => {
 });
 
 /* ---------- Pagamento ---------- */
+const ehDupla = () => !!inscricao && String(inscricao.formato || '').toLowerCase() === 'dupla';
+const valorPorAtleta = () => Math.round((Number(inscricao.valor) || 0) * 50) / 100;
+
 function abrirPagamento(d) {
   inscricao = d;
-  comprovante = null;
-  $('arquivo').value = '';
-  atualizarUpload(null);
   $('p-erro').classList.add('hidden');
 
   $('p-codigo').textContent = d.codigo;
   $('p-valor').textContent = brl(d.valor);
-  $('p-resumo').textContent = [d.evento, d.categoria, d.equipe].filter(Boolean).join(' · ');
+  $('p-resumo').textContent = [d.evento, d.categoria, d.equipe, d.lote].filter(Boolean).join(' · ');
+  $('p-lote-aviso').classList.toggle('hidden', !d.loteMudou);
+  $('p-lote-aviso').textContent = `O lote virou: o valor da sua inscrição agora é ${brl(d.valor)}${d.lote ? ' (' + d.lote + ')' : ''}. Pague o valor atualizado.`;
 
+  const qtd = Number(d.comprovantes) || 0;
   const emAnalise = d.status === 'EM ANÁLISE';
   $('p-analise').classList.toggle('hidden', !emAnalise);
+  $('p-analise').textContent = (ehDupla() && qtd === 1)
+    ? 'Já recebemos 1 comprovante desta dupla. Se falta o do outro atleta, envie abaixo.'
+    : `Já recebemos ${qtd > 1 ? qtd + ' comprovantes' : 'o comprovante'} desta inscrição. Envie outro só se a organização pedir.`;
   $('p-expira-box').classList.toggle('hidden', emAnalise || !d.expiraEm);
   $('p-expira').textContent = `Pague e envie o comprovante até ${d.expiraEm}. Depois disso a inscrição expira.`;
 
@@ -470,6 +489,10 @@ function abrirPagamento(d) {
   $('tab-cartao').classList.toggle('hidden', !pg.linkCartao);
   $('btn-cartao').href = pg.linkCartao || '#';
   $('c-valor-cartao').textContent = brl(d.valor);
+  $('c-valor-atleta').textContent = brl(valorPorAtleta());
+  $('c-valor-total').textContent = brl(d.valor);
+  $('cartao-individual').classList.toggle('hidden', ehDupla());
+  $('cartao-dupla').classList.toggle('hidden', !ehDupla());
 
   escolherForma(pg.pixCopiaCola || pg.pixChave ? 'Pix' : 'Cartão');
   mostrar('tela-pagamento');
@@ -481,9 +504,23 @@ function escolherForma(f) {
   $('tab-cartao').classList.toggle('ativo', f === 'Cartão');
   $('pane-pix').classList.toggle('hidden', f !== 'Pix');
   $('pane-cartao').classList.toggle('hidden', f !== 'Cartão');
-  $('upload-dica').textContent = f === 'Cartão'
-    ? 'Print da tela de pagamento aprovado ou PDF'
-    : 'Print do comprovante Pix ou PDF';
+  montarUploads();
+}
+
+// Dupla no cartão: 2 campos de comprovante. Pix ou individual: 1 campo.
+function montarUploads() {
+  const ja = Number(inscricao && inscricao.comprovantes) || 0;
+  const n = (forma === 'Cartão' && ehDupla() && ja < 2) ? 2 - ja : 1;
+  const dica = forma === 'Cartão' ? 'Print da tela de pagamento aprovado ou PDF' : 'Print do comprovante Pix ou PDF';
+  comprovantes = new Array(n).fill(null);
+  $('upload-intro').classList.toggle('hidden', n < 2);
+  $('uploads').innerHTML = comprovantes.map((_, i) => `
+    ${n > 1 ? `<p class="upload-rotulo">Comprovante ${i + 1}${i === 1 ? ' (se já tiver)' : ''}</p>` : ''}
+    <label class="upload" id="upload-${i}" for="arquivo-${i}">
+      <span id="upload-txt-${i}">Toque para anexar o comprovante</span>
+      <small>${dica}</small>
+    </label>
+    <input type="file" id="arquivo-${i}" data-slot="${i}" accept="image/*,application/pdf" class="hidden">`).join('');
 }
 document.querySelectorAll('[data-forma]').forEach(b => b.addEventListener('click', () => escolherForma(b.dataset.forma)));
 
@@ -529,16 +566,19 @@ function comprimirImagem(file) {
     img.src = url;
   });
 }
-function atualizarUpload(nome) {
-  $('upload').classList.toggle('tem', !!nome);
-  $('upload-txt').textContent = nome ? '✓ ' + nome : 'Toque para anexar o comprovante';
+function atualizarUpload(i, nome) {
+  $('upload-' + i).classList.toggle('tem', !!nome);
+  $('upload-txt-' + i).textContent = nome ? '✓ ' + nome : 'Toque para anexar o comprovante';
 }
 
-$('arquivo').addEventListener('change', async () => {
-  const f = $('arquivo').files[0];
-  comprovante = null;
+$('uploads').addEventListener('change', async e => {
+  const input = e.target.closest('input[type=file]');
+  if (!input) return;
+  const i = +input.dataset.slot;
+  const f = input.files[0];
+  comprovantes[i] = null;
   $('p-erro').classList.add('hidden');
-  if (!f) { atualizarUpload(null); return; }
+  if (!f) { atualizarUpload(i, null); return; }
   try {
     let dataUrl;
     if (f.type === 'application/pdf') {
@@ -549,23 +589,28 @@ $('arquivo').addEventListener('change', async () => {
     } else {
       throw new Error('Envie uma foto, print ou PDF.');
     }
-    comprovante = { nome: f.name, tipo: dataUrl.slice(5, dataUrl.indexOf(';')), base64: dataUrl.split(',')[1] };
-    atualizarUpload(f.name);
+    comprovantes[i] = { nome: f.name, tipo: dataUrl.slice(5, dataUrl.indexOf(';')), base64: dataUrl.split(',')[1] };
+    atualizarUpload(i, f.name);
   } catch (err) {
-    $('arquivo').value = '';
-    atualizarUpload(null);
+    input.value = '';
+    atualizarUpload(i, null);
     alerta($('p-erro'), err.message);
   }
 });
 
 $('btn-enviar').addEventListener('click', async () => {
-  if (!comprovante) { alerta($('p-erro'), 'Anexe o comprovante de pagamento.'); return; }
+  const arquivos = comprovantes.filter(Boolean);
+  if (!arquivos.length) { alerta($('p-erro'), 'Anexe o comprovante de pagamento.'); return; }
   const btn = $('btn-enviar');
-  carregando(btn, true, 'Enviando comprovante...');
+  carregando(btn, true, arquivos.length > 1 ? 'Enviando comprovantes...' : 'Enviando comprovante...');
   try {
-    await apiPost({ acao: 'comprovante', codigo: inscricao.codigo, cpf: cpfTitular, forma, arquivo: comprovante });
-    $('s-titulo').textContent = 'Comprovante enviado!';
+    const r = await apiPost({ acao: 'comprovante', codigo: inscricao.codigo, cpf: cpfTitular, forma, arquivos });
+    const total = Number(r.comprovantes) || arquivos.length;
+    $('s-titulo').textContent = arquivos.length > 1 ? 'Comprovantes enviados!' : 'Comprovante enviado!';
     $('s-codigo').textContent = inscricao.codigo;
+    const falta = forma === 'Cartão' && ehDupla() && total < 2;
+    $('s-falta').classList.toggle('hidden', !falta);
+    $('s-falta').textContent = `Falta o comprovante do outro atleta? Ele pode enviar pelo link ${location.origin + location.pathname}?codigo=${inscricao.codigo}, usando o CPF dele.`;
     mostrar('tela-sucesso');
   } catch (err) {
     alerta($('p-erro'), err.message);
