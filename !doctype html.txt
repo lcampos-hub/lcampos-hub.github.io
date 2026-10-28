@@ -1,0 +1,618 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Inscrição | Roque Box</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --laranja: #FF5722; --preto: #1A1A1A; --fundo: #0F0F0F; --borda: #2E2E2E;
+    --campo: #121212; --texto: #F5F5F5; --sub: #A0A0A0; --erro: #FF5252; --ok: #4CAF50;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--fundo); color: var(--texto); font-family: Inter, system-ui, sans-serif; font-size: 16px; line-height: 1.5; min-height: 100vh; }
+  header { background: var(--preto); border-bottom: 3px solid var(--laranja); padding: 22px 16px; text-align: center; }
+  header img { max-height: 70px; margin-bottom: 8px; }
+  header h1 { font-family: 'Bebas Neue', sans-serif; font-size: 2.3rem; letter-spacing: 1px; line-height: 1; }
+  header p { color: var(--sub); font-size: .9rem; margin-top: 6px; }
+  main { max-width: 560px; margin: 0 auto; padding: 20px 16px 60px; }
+  .card { background: var(--preto); border: 1px solid var(--borda); border-radius: 14px; padding: 18px; margin-bottom: 16px; }
+  .card h2 { font-family: 'Bebas Neue', sans-serif; font-size: 1.5rem; color: var(--laranja); letter-spacing: .5px; margin-bottom: 4px; }
+  label { display: block; font-size: .85rem; font-weight: 600; color: var(--sub); margin: 12px 0 4px; }
+  input, select { width: 100%; background: var(--campo); border: 1px solid var(--borda); color: var(--texto); border-radius: 10px; padding: 12px; font-size: 16px; font-family: inherit; }
+  input[type=date] { min-height: 48px; color-scheme: dark; }
+  input:focus, select:focus { outline: none; border-color: var(--laranja); }
+  .linha { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .erro-msg { color: var(--erro); font-size: .8rem; margin-top: 4px; display: none; }
+  .invalido input, .invalido select { border-color: var(--erro); }
+  .invalido .erro-msg { display: block; }
+  .btn { display: block; width: 100%; background: var(--laranja); color: #fff; border: none; border-radius: 12px; padding: 15px; font-size: 1rem; font-weight: 700; cursor: pointer; text-align: center; text-decoration: none; font-family: inherit; }
+  .btn:disabled { opacity: .55; cursor: wait; }
+  .btn.sec { background: transparent; border: 1px solid var(--laranja); color: var(--laranja); }
+  .btn.mini { display: inline-block; width: auto; padding: 8px 14px; font-size: .85rem; border-radius: 8px; }
+  .check { display: flex; gap: 10px; align-items: flex-start; font-size: .9rem; color: var(--texto); font-weight: 400; margin: 0; }
+  .check input { width: 22px; height: 22px; flex-shrink: 0; accent-color: var(--laranja); margin-top: 1px; }
+  a { color: var(--laranja); }
+  .alerta { border-radius: 10px; padding: 12px; font-size: .9rem; margin-bottom: 14px; border: 1px solid; }
+  .alerta.erro { background: #2a1010; border-color: var(--erro); }
+  .alerta.ok { background: #102a14; border-color: var(--ok); }
+  .alerta.info { background: #2a1810; border-color: var(--laranja); }
+  .hidden { display: none !important; }
+  .sub { color: var(--sub); font-size: .9rem; }
+  .centro { text-align: center; }
+  .mt { margin-top: 14px; }
+  .evento-item { display: block; width: 100%; text-align: left; background: var(--preto); border: 1px solid var(--borda); border-left: 4px solid var(--laranja); border-radius: 12px; padding: 16px; margin-bottom: 12px; color: var(--texto); font-family: inherit; font-size: 1rem; cursor: pointer; }
+  .evento-item span { display: block; color: var(--sub); font-size: .85rem; margin-top: 2px; }
+  .codigo { font-family: 'Bebas Neue', sans-serif; font-size: 2.8rem; color: var(--laranja); letter-spacing: 6px; text-align: center; line-height: 1.1; }
+  .valor { font-size: 1.7rem; font-weight: 700; text-align: center; }
+  .tabs { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 8px; margin: 10px 0 14px; }
+  .tab { background: var(--campo); border: 1px solid var(--borda); color: var(--sub); border-radius: 10px; padding: 12px; font-weight: 700; cursor: pointer; font-family: inherit; font-size: 1rem; }
+  .tab.ativo { border-color: var(--laranja); color: var(--laranja); background: #1f120d; }
+  .copia { background: var(--campo); border: 1px dashed var(--borda); border-radius: 10px; padding: 10px; font-size: .8rem; word-break: break-all; color: var(--texto); margin: 6px 0 8px; max-height: 96px; overflow: auto; }
+  .upload { display: block; border: 2px dashed var(--borda); border-radius: 12px; padding: 22px 12px; text-align: center; cursor: pointer; color: var(--sub); margin: 0 0 14px; font-weight: 600; }
+  .upload small { display: block; font-weight: 400; font-size: .8rem; margin-top: 4px; }
+  .upload.tem { border-color: var(--ok); color: var(--ok); }
+  .link-volta { word-break: break-all; font-size: .85rem; }
+  .spinner { width: 40px; height: 40px; border: 4px solid var(--borda); border-top-color: var(--laranja); border-radius: 50%; animation: gira 0.8s linear infinite; margin: 50px auto 14px; }
+  @keyframes gira { to { transform: rotate(360deg); } }
+  .grande { font-size: 3rem; text-align: center; }
+  footer { text-align: center; color: #555; font-size: .75rem; padding: 10px 16px 30px; }
+</style>
+</head>
+<body>
+
+<header>
+  <img id="h-logo" class="hidden" alt="">
+  <h1 id="h-nome">Roque Box</h1>
+  <p id="h-info">Inscrições</p>
+</header>
+
+<main>
+
+  <!-- CARREGANDO -->
+  <section class="tela" id="tela-carregando">
+    <div class="spinner"></div>
+    <p class="sub centro">Carregando...</p>
+  </section>
+
+  <!-- ERRO GERAL -->
+  <section class="tela hidden" id="tela-erro">
+    <div class="alerta erro" id="erro-geral"></div>
+    <button class="btn sec" onclick="location.reload()">Tentar novamente</button>
+  </section>
+
+  <!-- LISTA DE EVENTOS -->
+  <section class="tela hidden" id="tela-eventos">
+    <div id="lista-eventos"></div>
+    <button class="btn sec mt" data-ir="tela-consulta">Já me inscrevi / enviar comprovante</button>
+  </section>
+
+  <!-- FORMULÁRIO -->
+  <section class="tela hidden" id="tela-form">
+    <form id="form" novalidate>
+      <div class="card">
+        <h2>Categoria</h2>
+        <div class="campo">
+          <label for="categoria">Escolha sua categoria</label>
+          <select id="categoria"></select>
+          <div class="erro-msg">Escolha uma categoria</div>
+        </div>
+        <p class="sub mt hidden" id="valor-cat"></p>
+        <div class="campo hidden" id="campo-equipe">
+          <label for="equipe">Nome da dupla</label>
+          <input id="equipe" type="text" maxlength="40" autocomplete="off">
+          <div class="erro-msg">Informe o nome da dupla</div>
+        </div>
+      </div>
+
+      <div id="atletas"></div>
+
+      <div class="card">
+        <div class="campo">
+          <label class="check">
+            <input type="checkbox" id="aceite">
+            <span>Li e aceito o regulamento e declaro estar apto(a) a participar, assumindo a responsabilidade pela minha participação. <a id="link-regulamento" class="hidden" target="_blank" rel="noopener">Ver regulamento</a></span>
+          </label>
+          <div class="erro-msg">É preciso aceitar para continuar</div>
+        </div>
+      </div>
+
+      <div class="alerta erro hidden" id="form-erro"></div>
+      <button class="btn" id="btn-inscrever" type="submit">Continuar para pagamento</button>
+      <button class="btn sec mt" type="button" data-ir="tela-consulta">Já me inscrevi / enviar comprovante</button>
+    </form>
+  </section>
+
+  <!-- PAGAMENTO -->
+  <section class="tela hidden" id="tela-pagamento">
+    <div class="card centro">
+      <p class="sub">Seu código de inscrição</p>
+      <div class="codigo" id="p-codigo"></div>
+      <p class="sub" id="p-resumo"></p>
+      <div class="valor mt" id="p-valor"></div>
+    </div>
+
+    <div class="alerta info hidden" id="p-analise">Já recebemos um comprovante desta inscrição. Envie outro só se a organização pedir.</div>
+    <div class="alerta info" id="p-expira-box"><span id="p-expira"></span></div>
+
+    <div class="card">
+      <h2>1. Pague</h2>
+      <div class="tabs">
+        <button class="tab ativo" id="tab-pix" type="button" data-forma="Pix">Pix</button>
+        <button class="tab" id="tab-cartao" type="button" data-forma="Cartão">Cartão</button>
+      </div>
+
+      <div id="pane-pix">
+        <div id="bloco-pix-cc">
+          <label>Pix copia e cola</label>
+          <div class="copia" id="pix-cc"></div>
+          <button class="btn mini" type="button" data-copiar="pix-cc">Copiar código</button>
+        </div>
+        <div id="bloco-pix-chave">
+          <label>Ou use a chave Pix</label>
+          <div class="copia" id="pix-chave"></div>
+          <button class="btn mini sec" type="button" data-copiar="pix-chave">Copiar chave</button>
+        </div>
+      </div>
+
+      <div id="pane-cartao" class="hidden">
+        <p class="sub">Você será levado ao link de pagamento. Pague o valor de <strong id="c-valor-cartao"></strong> e depois volte aqui para enviar o comprovante.</p>
+        <a class="btn mt" id="btn-cartao" target="_blank" rel="noopener">Pagar com cartão</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>2. Envie o comprovante</h2>
+      <label class="upload" id="upload" for="arquivo">
+        <span id="upload-txt">Toque para anexar o comprovante</span>
+        <small>Foto, print ou PDF</small>
+      </label>
+      <input type="file" id="arquivo" accept="image/*,application/pdf" class="hidden">
+      <div class="alerta erro hidden" id="p-erro"></div>
+      <button class="btn" id="btn-enviar" type="button">Enviar comprovante</button>
+    </div>
+
+    <div class="card">
+      <p class="sub">Se precisar sair, volte por este link para enviar o comprovante depois:</p>
+      <a class="link-volta" id="p-link"></a>
+    </div>
+  </section>
+
+  <!-- SUCESSO -->
+  <section class="tela hidden" id="tela-sucesso">
+    <div class="card centro">
+      <div class="grande">✅</div>
+      <h2>Comprovante enviado!</h2>
+      <p class="sub mt">Vamos conferir seu pagamento. Assim que aprovado, sua inscrição fica <strong>confirmada</strong>.</p>
+      <p class="sub mt">Seu código:</p>
+      <div class="codigo" id="s-codigo"></div>
+      <p class="sub mt">Para acompanhar, use “Já me inscrevi” com esse código e seu CPF.</p>
+    </div>
+  </section>
+
+  <!-- CONSULTA -->
+  <section class="tela hidden" id="tela-consulta">
+    <form class="card" id="form-consulta" novalidate>
+      <h2>Consultar inscrição</h2>
+      <p class="sub">Consulte o status ou envie o comprovante de pagamento.</p>
+      <label for="c-codigo">Código de inscrição</label>
+      <input id="c-codigo" type="text" maxlength="6" autocapitalize="characters" autocomplete="off" placeholder="Ex.: K7M2QP">
+      <label for="c-cpf">CPF de um dos atletas</label>
+      <input id="c-cpf" type="text" inputmode="numeric" maxlength="14" placeholder="000.000.000-00">
+      <div class="alerta erro hidden mt" id="c-erro"></div>
+      <button class="btn mt" id="btn-consultar" type="submit">Consultar</button>
+    </form>
+    <button class="btn sec" type="button" id="btn-voltar-form">Fazer nova inscrição</button>
+  </section>
+
+</main>
+
+<footer>Roque Box · Goiânia</footer>
+
+<script>
+/* ======= CONFIGURAÇÃO ======= */
+const API_URL = 'https://script.google.com/macros/s/AKfycbxxroiwtgp9ZjlqGE3_H2VQlUthkMFq6w86b79Tw8vD5LQaxJ08NfYwf20du8fH_ecp/exec'; // termina em /exec
+/* ============================ */
+
+const CAMISETAS = ['PP', 'P', 'M', 'G', 'GG', 'XGG'];
+const params = new URLSearchParams(location.search);
+let evento = null, inscricao = null, forma = 'Pix', comprovante = null, cpfTitular = '';
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const brl = v => Number(v || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+const digitos = s => String(s || '').replace(/\D/g, '');
+
+function mostrar(id) {
+  document.querySelectorAll('.tela').forEach(t => t.classList.toggle('hidden', t.id !== id));
+  scrollTo(0, 0);
+}
+function falha(msg) { $('erro-geral').textContent = msg; mostrar('tela-erro'); }
+function alerta(el, msg, tipo = 'erro') { el.className = 'alerta ' + tipo; el.textContent = msg; }
+function carregando(btn, sim, texto) {
+  if (sim) { btn.dataset.txt = btn.textContent; btn.textContent = texto; btn.disabled = true; }
+  else { btn.textContent = btn.dataset.txt || btn.textContent; btn.disabled = false; }
+}
+
+/* ---------- API ---------- */
+async function apiGet(q) {
+  const r = await fetch(API_URL + '?' + new URLSearchParams(q));
+  const j = await r.json();
+  if (!j.ok) throw new Error(j.erro || 'Erro inesperado.');
+  return j;
+}
+async function apiPost(dados) {
+  // Corpo em texto puro evita bloqueio de CORS no Apps Script
+  const r = await fetch(API_URL, { method: 'POST', body: JSON.stringify(dados) });
+  const j = await r.json();
+  if (!j.ok) throw new Error(j.erro || 'Erro inesperado.');
+  return j;
+}
+
+/* ---------- Máscaras e validação ---------- */
+function mascaraCPF(v) {
+  v = digitos(v).slice(0, 11);
+  return v.replace(/(\d{3})(\d)/, '$1.$2').replace(/(\d{3})(\d)/, '$1.$2').replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+}
+function mascaraTel(v) {
+  v = digitos(v).slice(0, 11);
+  if (!v) return '';
+  if (v.length <= 2) return '(' + v;
+  if (v.length <= 6) return `(${v.slice(0, 2)}) ${v.slice(2)}`;
+  if (v.length <= 10) return `(${v.slice(0, 2)}) ${v.slice(2, 6)}-${v.slice(6)}`;
+  return `(${v.slice(0, 2)}) ${v.slice(2, 7)}-${v.slice(7)}`;
+}
+function cpfValido(cpf) {
+  cpf = digitos(cpf);
+  if (cpf.length !== 11 || /^(\d)\1+$/.test(cpf)) return false;
+  for (let t = 9; t < 11; t++) {
+    let soma = 0;
+    for (let i = 0; i < t; i++) soma += +cpf[i] * (t + 1 - i);
+    if (((soma * 10) % 11) % 10 !== +cpf[t]) return false;
+  }
+  return true;
+}
+
+document.addEventListener('input', e => {
+  const el = e.target;
+  if (el.id.endsWith('cpf')) el.value = mascaraCPF(el.value);
+  if (el.id.endsWith('_tel')) el.value = mascaraTel(el.value);
+  if (el.id === 'c-codigo') el.value = el.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+  const campo = el.closest('.campo');
+  if (campo) campo.classList.remove('invalido');
+});
+document.addEventListener('change', e => {
+  const campo = e.target.closest('.campo');
+  if (campo) campo.classList.remove('invalido');
+});
+
+/* ---------- Formulário ---------- */
+function campo(id, rotulo, tipo, erro, extra = '') {
+  return `<div class="campo"><label for="${id}">${rotulo}</label><input id="${id}" type="${tipo}" ${extra}><div class="erro-msg">${erro}</div></div>`;
+}
+function blocoAtleta(n) {
+  const ac = n === 1;
+  return `<div class="card" id="bloco-a${n}">
+    <h2 id="titulo-a${n}">Atleta ${n}</h2>
+    ${campo(`a${n}_nome`, 'Nome completo', 'text', 'Informe nome e sobrenome', `maxlength="80" autocomplete="${ac ? 'name' : 'off'}"`)}
+    <div class="linha">
+      ${campo(`a${n}_cpf`, 'CPF', 'text', 'CPF inválido', 'inputmode="numeric" maxlength="14" placeholder="000.000.000-00" autocomplete="off"')}
+      ${campo(`a${n}_nasc`, 'Nascimento', 'date', 'Data inválida')}
+    </div>
+    ${campo(`a${n}_tel`, 'WhatsApp', 'tel', 'Telefone inválido', `inputmode="numeric" maxlength="15" placeholder="(62) 90000-0000" autocomplete="${ac ? 'tel' : 'off'}"`)}
+    ${campo(`a${n}_email`, 'E-mail', 'email', 'E-mail inválido', `maxlength="100" autocomplete="${ac ? 'email' : 'off'}"`)}
+    <div class="linha">
+      <div class="campo"><label for="a${n}_cam">Camiseta</label>
+        <select id="a${n}_cam"><option value="">—</option>${CAMISETAS.map(t => `<option>${t}</option>`).join('')}</select>
+        <div class="erro-msg">Escolha o tamanho</div></div>
+      ${campo(`a${n}_box`, 'Box', 'text', 'Informe o box', 'maxlength="60"')}
+    </div>
+    ${campo(`a${n}_insta`, 'Instagram (opcional)', 'text', '', 'maxlength="40" placeholder="@seuperfil" autocapitalize="off" autocomplete="off"')}
+  </div>`;
+}
+
+function formatoSel() {
+  const o = $('categoria').selectedOptions[0];
+  return o && o.dataset.formato ? o.dataset.formato : null;
+}
+function nAtletas() { return formatoSel() === 'Dupla' ? 2 : 1; }
+
+function atualizarFormato() {
+  const f = formatoSel();
+  const dupla = f === 'Dupla';
+  $('bloco-a2').classList.toggle('hidden', !dupla);
+  $('campo-equipe').classList.toggle('hidden', !dupla);
+  $('titulo-a1').textContent = dupla ? 'Atleta 1 (responsável)' : 'Atleta';
+  $('valor-cat').classList.toggle('hidden', !f);
+  if (f) $('valor-cat').textContent = 'Valor da inscrição: ' + brl(dupla ? evento.valorDupla : evento.valorIndividual) + (dupla ? ' (por dupla)' : '');
+}
+
+function validar() {
+  let ok = true;
+  const marca = (id, valido, msg) => {
+    const c = $(id).closest('.campo');
+    if (msg) c.querySelector('.erro-msg').textContent = msg;
+    c.classList.toggle('invalido', !valido);
+    if (!valido) ok = false;
+  };
+  const anoAtual = new Date().getFullYear();
+  const n = nAtletas();
+
+  marca('categoria', !!$('categoria').value);
+  if (n === 2) marca('equipe', $('equipe').value.trim().length >= 2);
+
+  for (let i = 1; i <= n; i++) {
+    const p = 'a' + i + '_';
+    marca(p + 'nome', $(p + 'nome').value.trim().split(/\s+/).length >= 2);
+    marca(p + 'cpf', cpfValido($(p + 'cpf').value), 'CPF inválido');
+    const ano = +($(p + 'nasc').value || '').slice(0, 4);
+    marca(p + 'nasc', ano >= anoAtual - 100 && ano <= anoAtual - 5);
+    const t = digitos($(p + 'tel').value).length;
+    marca(p + 'tel', t >= 10 && t <= 11);
+    marca(p + 'email', /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test($(p + 'email').value.trim()));
+    marca(p + 'cam', !!$(p + 'cam').value);
+    marca(p + 'box', $(p + 'box').value.trim().length > 0);
+  }
+  if (n === 2 && cpfValido($('a2_cpf').value) && digitos($('a1_cpf').value) === digitos($('a2_cpf').value)) {
+    marca('a2_cpf', false, 'CPF igual ao do atleta 1');
+  }
+  marca('aceite', $('aceite').checked);
+
+  if (!ok) {
+    const primeiro = document.querySelector('#tela-form .invalido');
+    if (primeiro) primeiro.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+  return ok;
+}
+
+$('form').addEventListener('submit', async e => {
+  e.preventDefault();
+  $('form-erro').classList.add('hidden');
+  if (!validar()) return;
+
+  const atletas = [];
+  for (let i = 1; i <= nAtletas(); i++) {
+    const p = 'a' + i + '_';
+    atletas.push({
+      Nome: $(p + 'nome').value, CPF: $(p + 'cpf').value, Nascimento: $(p + 'nasc').value,
+      Telefone: $(p + 'tel').value, Email: $(p + 'email').value, Camiseta: $(p + 'cam').value,
+      Box: $(p + 'box').value, Instagram: $(p + 'insta').value
+    });
+  }
+
+  const btn = $('btn-inscrever');
+  carregando(btn, true, 'Enviando inscrição...');
+  try {
+    const r = await apiPost({
+      acao: 'inscrever', idEvento: evento.id, categoria: $('categoria').value,
+      nomeEquipe: $('equipe').value, aceite: true, atletas
+    });
+    cpfTitular = digitos(atletas[0].CPF);
+    abrirPagamento(r);
+  } catch (err) {
+    alerta($('form-erro'), err.message);
+    $('form-erro').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  } finally {
+    carregando(btn, false);
+  }
+});
+
+/* ---------- Pagamento ---------- */
+function abrirPagamento(d) {
+  inscricao = d;
+  comprovante = null;
+  $('arquivo').value = '';
+  atualizarUpload(null);
+  $('p-erro').classList.add('hidden');
+
+  $('p-codigo').textContent = d.codigo;
+  $('p-valor').textContent = brl(d.valor);
+  $('p-resumo').textContent = [d.evento, d.categoria, d.equipe].filter(Boolean).join(' · ');
+
+  const emAnalise = d.status === 'EM ANÁLISE';
+  $('p-analise').classList.toggle('hidden', !emAnalise);
+  $('p-expira-box').classList.toggle('hidden', emAnalise || !d.expiraEm);
+  $('p-expira').textContent = `Pague e envie o comprovante até ${d.expiraEm}. Depois disso a inscrição expira.`;
+
+  const link = location.origin + location.pathname + '?codigo=' + d.codigo;
+  $('p-link').textContent = link;
+  $('p-link').href = link;
+
+  const pg = d.pagamento || {};
+  $('pix-cc').textContent = pg.pixCopiaCola || '';
+  $('bloco-pix-cc').classList.toggle('hidden', !pg.pixCopiaCola);
+  $('pix-chave').textContent = pg.pixChave || '';
+  $('bloco-pix-chave').classList.toggle('hidden', !pg.pixChave);
+  $('tab-pix').classList.toggle('hidden', !pg.pixCopiaCola && !pg.pixChave);
+  $('tab-cartao').classList.toggle('hidden', !pg.linkCartao);
+  $('btn-cartao').href = pg.linkCartao || '#';
+  $('c-valor-cartao').textContent = brl(d.valor);
+
+  escolherForma(pg.pixCopiaCola || pg.pixChave ? 'Pix' : 'Cartão');
+  mostrar('tela-pagamento');
+}
+
+function escolherForma(f) {
+  forma = f;
+  $('tab-pix').classList.toggle('ativo', f === 'Pix');
+  $('tab-cartao').classList.toggle('ativo', f === 'Cartão');
+  $('pane-pix').classList.toggle('hidden', f !== 'Pix');
+  $('pane-cartao').classList.toggle('hidden', f !== 'Cartão');
+}
+document.querySelectorAll('[data-forma]').forEach(b => b.addEventListener('click', () => escolherForma(b.dataset.forma)));
+
+document.addEventListener('click', async e => {
+  const b = e.target.closest('[data-copiar]');
+  if (!b) return;
+  const txt = $(b.dataset.copiar).textContent;
+  try { await navigator.clipboard.writeText(txt); }
+  catch {
+    const ta = document.createElement('textarea');
+    ta.value = txt; document.body.appendChild(ta); ta.select();
+    document.execCommand('copy'); ta.remove();
+  }
+  const original = b.textContent;
+  b.textContent = 'Copiado ✓';
+  setTimeout(() => { b.textContent = original; }, 1800);
+});
+
+/* ---------- Upload do comprovante ---------- */
+function lerArquivo(file) {
+  return new Promise((res, rej) => {
+    const fr = new FileReader();
+    fr.onload = () => res(fr.result);
+    fr.onerror = () => rej(new Error('Não foi possível ler o arquivo.'));
+    fr.readAsDataURL(file);
+  });
+}
+function comprimirImagem(file) {
+  return new Promise((res, rej) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      const max = 1600;
+      let w = img.width, h = img.height;
+      if (w > max || h > max) { const r = Math.min(max / w, max / h); w = Math.round(w * r); h = Math.round(h * r); }
+      const c = document.createElement('canvas');
+      c.width = w; c.height = h;
+      c.getContext('2d').drawImage(img, 0, 0, w, h);
+      URL.revokeObjectURL(url);
+      res(c.toDataURL('image/jpeg', 0.8));
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); rej(new Error('Não foi possível abrir a imagem. Tente um print da tela ou um PDF.')); };
+    img.src = url;
+  });
+}
+function atualizarUpload(nome) {
+  $('upload').classList.toggle('tem', !!nome);
+  $('upload-txt').textContent = nome ? '✓ ' + nome : 'Toque para anexar o comprovante';
+}
+
+$('arquivo').addEventListener('change', async () => {
+  const f = $('arquivo').files[0];
+  comprovante = null;
+  $('p-erro').classList.add('hidden');
+  if (!f) { atualizarUpload(null); return; }
+  try {
+    let dataUrl;
+    if (f.type === 'application/pdf') {
+      if (f.size > 5 * 1024 * 1024) throw new Error('PDF muito grande (máximo 5 MB).');
+      dataUrl = await lerArquivo(f);
+    } else if (f.type.startsWith('image/') || /\.(heic|heif)$/i.test(f.name)) {
+      dataUrl = await comprimirImagem(f);
+    } else {
+      throw new Error('Envie uma foto, print ou PDF.');
+    }
+    comprovante = { nome: f.name, tipo: dataUrl.slice(5, dataUrl.indexOf(';')), base64: dataUrl.split(',')[1] };
+    atualizarUpload(f.name);
+  } catch (err) {
+    $('arquivo').value = '';
+    atualizarUpload(null);
+    alerta($('p-erro'), err.message);
+  }
+});
+
+$('btn-enviar').addEventListener('click', async () => {
+  if (!comprovante) { alerta($('p-erro'), 'Anexe o comprovante de pagamento.'); return; }
+  const btn = $('btn-enviar');
+  carregando(btn, true, 'Enviando comprovante...');
+  try {
+    await apiPost({ acao: 'comprovante', codigo: inscricao.codigo, cpf: cpfTitular, forma, arquivo: comprovante });
+    $('s-codigo').textContent = inscricao.codigo;
+    mostrar('tela-sucesso');
+  } catch (err) {
+    alerta($('p-erro'), err.message);
+  } finally {
+    carregando(btn, false);
+  }
+});
+
+/* ---------- Consulta ---------- */
+$('form-consulta').addEventListener('submit', async e => {
+  e.preventDefault();
+  $('c-erro').classList.add('hidden');
+  const codigo = $('c-codigo').value.trim().toUpperCase();
+  const cpf = digitos($('c-cpf').value);
+  if (codigo.length < 6 || cpf.length !== 11) { alerta($('c-erro'), 'Informe o código de 6 caracteres e o CPF de um dos atletas.'); return; }
+
+  const btn = $('btn-consultar');
+  carregando(btn, true, 'Consultando...');
+  try {
+    const { inscricao: d } = await apiGet({ acao: 'consultar', codigo, cpf });
+    cpfTitular = cpf;
+    $('h-nome').textContent = d.evento;
+    if (d.pagamento) abrirPagamento(d);
+    else alerta($('c-erro'), d.mensagem, d.status === 'CONFIRMADO' ? 'ok' : 'erro');
+  } catch (err) {
+    alerta($('c-erro'), err.message);
+  } finally {
+    carregando(btn, false);
+  }
+});
+
+document.querySelectorAll('[data-ir]').forEach(b => b.addEventListener('click', () => mostrar(b.dataset.ir)));
+$('btn-voltar-form').addEventListener('click', () => {
+  if (evento && evento.aberto) mostrar('tela-form');
+  else location.href = location.pathname;
+});
+
+/* ---------- Início ---------- */
+async function abrirEvento(id) {
+  mostrar('tela-carregando');
+  evento = (await apiGet({ acao: 'evento', id })).evento;
+
+  $('h-nome').textContent = evento.nome;
+  $('h-info').textContent = [evento.data, evento.local].filter(Boolean).join(' · ');
+  document.title = 'Inscrição | ' + evento.nome;
+  if (evento.logo) { $('h-logo').src = evento.logo; $('h-logo').classList.remove('hidden'); }
+  if (!evento.aberto) { falha('As inscrições para este evento estão encerradas.'); return; }
+
+  const grupos = {};
+  evento.categorias.forEach(c => (grupos[c.formato] = grupos[c.formato] || []).push(c));
+  $('categoria').innerHTML = '<option value="">Selecione...</option>' +
+    Object.entries(grupos).map(([f, lista]) =>
+      `<optgroup label="${esc(f)}">${lista.map(c => `<option value="${esc(c.nome)}" data-formato="${esc(c.formato)}">${esc(c.nome)}</option>`).join('')}</optgroup>`
+    ).join('');
+  $('categoria').addEventListener('change', atualizarFormato);
+
+  if (evento.regulamento) { $('link-regulamento').href = evento.regulamento; $('link-regulamento').classList.remove('hidden'); }
+
+  $('atletas').innerHTML = blocoAtleta(1) + blocoAtleta(2);
+  atualizarFormato();
+  mostrar('tela-form');
+}
+
+async function iniciar() {
+  if (API_URL.startsWith('COLE')) { falha('Configure a API_URL no arquivo inscricao.html.'); return; }
+  try {
+    if (params.get('codigo')) {
+      $('c-codigo').value = params.get('codigo').toUpperCase();
+      mostrar('tela-consulta');
+      $('c-cpf').focus();
+      return;
+    }
+    if (params.get('evento')) { await abrirEvento(params.get('evento')); return; }
+
+    const { eventos } = await apiGet({ acao: 'eventos' });
+    if (eventos.length === 1) { await abrirEvento(eventos[0].id); return; }
+    $('lista-eventos').innerHTML = eventos.length
+      ? eventos.map(e => `<button class="evento-item" data-id="${esc(e.id)}"><strong>${esc(e.nome)}</strong><span>${esc(e.data)} · ${esc(e.local)}</span></button>`).join('')
+      : '<p class="sub centro">Nenhuma inscrição aberta no momento.</p>';
+    mostrar('tela-eventos');
+  } catch (err) {
+    falha('Não foi possível carregar: ' + err.message);
+  }
+}
+
+$('lista-eventos').addEventListener('click', e => {
+  const b = e.target.closest('.evento-item');
+  if (b) abrirEvento(b.dataset.id).catch(err => falha(err.message));
+});
+
+iniciar();
+</script>
+</body>
+</html>
