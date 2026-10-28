@@ -59,6 +59,10 @@
   .spinner { width: 40px; height: 40px; border: 4px solid var(--borda); border-top-color: var(--laranja); border-radius: 50%; animation: gira 0.8s linear infinite; margin: 50px auto 14px; }
   @keyframes gira { to { transform: rotate(360deg); } }
   .grande { font-size: 3rem; text-align: center; }
+  .termo { background: var(--campo); border: 1px solid var(--borda); border-radius: 10px; padding: 14px; margin: 12px 0 14px; max-height: 320px; overflow-y: auto; font-size: .9rem; line-height: 1.6; }
+  .termo p + p { margin-top: 10px; }
+  .termo strong { color: var(--laranja); font-weight: 600; white-space: nowrap; }
+  .lacuna { color: var(--sub); }
   footer { text-align: center; color: #555; font-size: .75rem; padding: 10px 16px 30px; }
 </style>
 </head>
@@ -111,10 +115,13 @@
       <div id="atletas"></div>
 
       <div class="card">
+        <h2>Termo de Aptidão Física e Responsabilidade</h2>
+        <p class="sub">Leia com atenção antes de aceitar. Seus dados são preenchidos automaticamente.</p>
+        <div class="termo" id="termo-texto"></div>
         <div class="campo">
           <label class="check">
             <input type="checkbox" id="aceite">
-            <span>Li e aceito o regulamento e declaro estar apto(a) a participar, assumindo a responsabilidade pela minha participação. <a id="link-regulamento" class="hidden" target="_blank" rel="noopener">Ver regulamento</a></span>
+            <span><span id="aceite-txt">Li e aceito o Termo de Declaração de Aptidão Física e Responsabilidade.</span> <a id="link-regulamento" class="hidden" target="_blank" rel="noopener">Ver regulamento</a></span>
           </label>
           <div class="erro-msg">É preciso aceitar para continuar</div>
         </div>
@@ -214,7 +221,7 @@
 
 <script>
 /* ======= CONFIGURAÇÃO ======= */
-const API_URL = 'https://script.google.com/macros/s/AKfycbxxroiwtgp9ZjlqGE3_H2VQlUthkMFq6w86b79Tw8vD5LQaxJ08NfYwf20du8fH_ecp/exec'; // termina em /exec
+const API_URL = 'COLE_AQUI_A_URL_DO_APP_DA_WEB'; // termina em /exec
 /* ============================ */
 
 const CAMISETAS = ['PP', 'P', 'M', 'G', 'GG', 'XGG'];
@@ -283,6 +290,7 @@ document.addEventListener('input', e => {
   if (el.id === 'c-codigo') el.value = el.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
   const campo = el.closest('.campo');
   if (campo) campo.classList.remove('invalido');
+  if (/^a[12]_(nome|cpf)$/.test(el.id)) renderTermo();
 });
 document.addEventListener('change', e => {
   const campo = e.target.closest('.campo');
@@ -328,6 +336,37 @@ function atualizarFormato() {
   $('titulo-a1').textContent = dupla ? 'Atleta 1 (responsável)' : 'Atleta';
   $('valor-cat').classList.toggle('hidden', !f);
   if (f) $('valor-cat').textContent = 'Valor da inscrição: ' + brl(dupla ? evento.valorDupla : evento.valorIndividual) + (dupla ? ' (por dupla)' : '');
+  renderTermo();
+}
+
+/* ---------- Termo de aptidão ---------- */
+const ENDERECO = 'Roque Box, Rua das Nações Unidas, QD 31 - LT 06 - Vila Jardim Pompéia, Goiânia - GO, 74690-135';
+
+function renderTermo() {
+  if (!evento || !$('a1_nome')) return;
+  const val = id => esc(($(id) && $(id).value || '').trim());
+  const preenche = t => t ? `<strong>${t}</strong>` : '<span class="lacuna">__________</span>';
+  const dupla = nAtletas() === 2;
+  const a1 = `${preenche(val('a1_nome'))}, CPF nº ${preenche(val('a1_cpf'))}`;
+  const a2 = `${preenche(val('a2_nome'))}, CPF nº ${preenche(val('a2_cpf'))}`;
+  const categoria = preenche(esc($('categoria').value));
+  const hoje = new Date().toLocaleDateString('pt-BR');
+
+  const p1 = dupla
+    ? `Atestamos para os devidos fins que nós, ${a1}, e ${a2}, nos encontramos em boas condições de saúde, estando aptos para participar do`
+    : `Atesto para os devidos fins que eu, ${a1}, me encontro em boas condições de saúde, estando apto(a) para participar do`;
+  const p2 = dupla
+    ? 'Declaramos ainda que quaisquer eventuais fatalidades ocorridas na execução das provas não são de responsabilidade do Roque Box, sendo nós única e exclusivamente responsáveis'
+    : 'Declaro ainda que quaisquer eventuais fatalidades ocorridas na execução das provas não são de responsabilidade do Roque Box, sendo eu única e exclusivamente responsável';
+
+  $('termo-texto').innerHTML =
+    `<p>${p1} <strong>${esc(evento.nome)}</strong>, na categoria ${categoria}, no dia <strong>${esc(evento.data)}</strong>, que irá acontecer no ${ENDERECO}.</p>` +
+    `<p>${p2} por toda a execução dos workouts propostos, não devendo o Roque Box ser responsabilizado por quaisquer lesões que ocorram na realização das provas.</p>` +
+    `<p>Goiânia, ${hoje}.</p>`;
+
+  $('aceite-txt').textContent = dupla
+    ? 'Nós, os dois atletas, lemos e aceitamos o Termo de Declaração de Aptidão Física e Responsabilidade.'
+    : 'Li e aceito o Termo de Declaração de Aptidão Física e Responsabilidade.';
 }
 
 function validar() {
