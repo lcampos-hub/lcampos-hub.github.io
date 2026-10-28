@@ -166,12 +166,15 @@
       </div>
 
       <div id="pane-cartao" class="hidden">
-        <p class="sub">Você será levado ao link de pagamento. Pague o valor de <strong id="c-valor-cartao"></strong> e depois volte aqui para enviar o comprovante.</p>
+        <p class="sub">Você será levado ao link de pagamento. Pague o valor de <strong id="c-valor-cartao"></strong>.</p>
         <a class="btn mt" id="btn-cartao" target="_blank" rel="noopener">Pagar com cartão</a>
+        <p class="sub mt">Depois de concluir o pagamento, volte aqui e toque em <strong>Já paguei com cartão</strong>.</p>
+        <div class="alerta erro hidden mt" id="c-pag-erro"></div>
+        <button class="btn sec mt" id="btn-cartao-ok" type="button">Já paguei com cartão</button>
       </div>
     </div>
 
-    <div class="card">
+    <div class="card" id="card-comprovante">
       <h2>2. Envie o comprovante</h2>
       <label class="upload" id="upload" for="arquivo">
         <span id="upload-txt">Toque para anexar o comprovante</span>
@@ -183,7 +186,7 @@
     </div>
 
     <div class="card">
-      <p class="sub">Se precisar sair, volte por este link para enviar o comprovante depois:</p>
+      <p class="sub">Se precisar sair, volte por este link para concluir o pagamento depois:</p>
       <a class="link-volta" id="p-link"></a>
     </div>
   </section>
@@ -192,7 +195,7 @@
   <section class="tela hidden" id="tela-sucesso">
     <div class="card centro">
       <div class="grande">✅</div>
-      <h2>Comprovante enviado!</h2>
+      <h2 id="s-titulo">Comprovante enviado!</h2>
       <p class="sub mt">Vamos conferir seu pagamento. Assim que aprovado, sua inscrição fica <strong>confirmada</strong>.</p>
       <p class="sub mt">Seu código:</p>
       <div class="codigo" id="s-codigo"></div>
@@ -221,7 +224,7 @@
 
 <script>
 /* ======= CONFIGURAÇÃO ======= */
-const API_URL = 'COLE_AQUI_A_URL_DO_APP_DA_WEB'; // termina em /exec
+const API_URL = 'https://script.google.com/macros/s/AKfycbykdaKeV9D7N0jGJQgWDEsubnFb4tLiLGozGOgsvZmvC9MrPAWGJxZeovo01ccJJT53/exec'; // termina em /exec
 /* ============================ */
 
 const CAMISETAS = ['PP', 'P', 'M', 'G', 'GG', 'XGG'];
@@ -454,7 +457,7 @@ function abrirPagamento(d) {
   const emAnalise = d.status === 'EM ANÁLISE';
   $('p-analise').classList.toggle('hidden', !emAnalise);
   $('p-expira-box').classList.toggle('hidden', emAnalise || !d.expiraEm);
-  $('p-expira').textContent = `Pague e envie o comprovante até ${d.expiraEm}. Depois disso a inscrição expira.`;
+  $('p-expira').textContent = `Conclua o pagamento até ${d.expiraEm}. Depois disso a inscrição expira.`;
 
   const link = location.origin + location.pathname + '?codigo=' + d.codigo;
   $('p-link').textContent = link;
@@ -480,6 +483,7 @@ function escolherForma(f) {
   $('tab-cartao').classList.toggle('ativo', f === 'Cartão');
   $('pane-pix').classList.toggle('hidden', f !== 'Pix');
   $('pane-cartao').classList.toggle('hidden', f !== 'Cartão');
+  $('card-comprovante').classList.toggle('hidden', f === 'Cartão');
 }
 document.querySelectorAll('[data-forma]').forEach(b => b.addEventListener('click', () => escolherForma(b.dataset.forma)));
 
@@ -559,11 +563,29 @@ $('btn-enviar').addEventListener('click', async () => {
   const btn = $('btn-enviar');
   carregando(btn, true, 'Enviando comprovante...');
   try {
-    await apiPost({ acao: 'comprovante', codigo: inscricao.codigo, cpf: cpfTitular, forma, arquivo: comprovante });
+    await apiPost({ acao: 'comprovante', codigo: inscricao.codigo, cpf: cpfTitular, forma: 'Pix', arquivo: comprovante });
+    $('s-titulo').textContent = 'Comprovante enviado!';
     $('s-codigo').textContent = inscricao.codigo;
     mostrar('tela-sucesso');
   } catch (err) {
     alerta($('p-erro'), err.message);
+  } finally {
+    carregando(btn, false);
+  }
+});
+
+$('btn-cartao-ok').addEventListener('click', async () => {
+  $('c-pag-erro').classList.add('hidden');
+  if (!confirm(`Você já concluiu o pagamento de ${brl(inscricao.valor)} no cartão?`)) return;
+  const btn = $('btn-cartao-ok');
+  carregando(btn, true, 'Enviando...');
+  try {
+    await apiPost({ acao: 'comprovante', codigo: inscricao.codigo, cpf: cpfTitular, forma: 'Cartão' });
+    $('s-titulo').textContent = 'Pagamento informado!';
+    $('s-codigo').textContent = inscricao.codigo;
+    mostrar('tela-sucesso');
+  } catch (err) {
+    alerta($('c-pag-erro'), err.message);
   } finally {
     carregando(btn, false);
   }
