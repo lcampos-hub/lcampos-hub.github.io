@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Leaderboard | Roque Box</title>
+<meta name="theme-color" content="#0F0F0F">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --laranja: #FF5722; --laranja-esc: #1f120d; --preto: #1A1A1A; --fundo: #0F0F0F; --borda: #2A2A2A;
+    --texto: #F5F5F5; --sub: #9A9A9A; --ouro: #FFC94D; --prata: #D6DCE4; --bronze: #E0915A; --ok: #4CAF50;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--fundo); color: var(--texto); font-family: Inter, system-ui, sans-serif; font-size: 15px; line-height: 1.45; min-height: 100vh; }
+  button, select { font-family: inherit; font-size: 15px; }
+  header { background: linear-gradient(180deg, #1d0f0a 0%, var(--preto) 100%); border-bottom: 3px solid var(--laranja); padding: 22px 16px 0; text-align: center; }
+  header img { max-height: 64px; margin-bottom: 6px; }
+  header h1 { font-family: 'Bebas Neue', sans-serif; font-size: 2.4rem; letter-spacing: 1px; line-height: .95; }
+  header h1 span { color: var(--laranja); }
+  header .info { color: var(--sub); font-size: .85rem; margin-top: 6px; }
+  .ao-vivo { display: inline-flex; align-items: center; gap: 6px; font-size: .75rem; color: var(--sub); margin-top: 8px; }
+  .ao-vivo i { width: 8px; height: 8px; border-radius: 50%; background: var(--ok); box-shadow: 0 0 0 0 rgba(76,175,80,.7); animation: pulso 2s infinite; }
+  .ao-vivo.erro i { background: #FF5252; animation: none; }
+  @keyframes pulso { 70% { box-shadow: 0 0 0 8px rgba(76,175,80,0); } 100% { box-shadow: 0 0 0 0 rgba(76,175,80,0); } }
+  nav { display: flex; max-width: 640px; margin: 14px auto 0; }
+  nav button { flex: 1; background: none; border: none; color: var(--sub); font-family: 'Bebas Neue', sans-serif; font-size: 1.35rem; letter-spacing: 1px; padding: 8px 0 10px; border-bottom: 3px solid transparent; margin-bottom: -3px; cursor: pointer; }
+  nav button.ativo { color: var(--laranja); border-color: var(--laranja); }
+  main { max-width: 640px; margin: 0 auto; padding: 16px 16px 60px; }
+  .chips { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 6px; margin-bottom: 14px; scrollbar-width: none; }
+  .chips::-webkit-scrollbar { display: none; }
+  .chip { flex-shrink: 0; background: var(--preto); border: 1px solid var(--borda); color: var(--sub); border-radius: 999px; padding: 8px 14px; font-weight: 600; font-size: .85rem; cursor: pointer; white-space: nowrap; }
+  .chip.ativo { background: var(--laranja); border-color: var(--laranja); color: #fff; }
+  /* Pódio */
+  .podio { display: grid; grid-template-columns: 1fr 1.15fr 1fr; gap: 8px; align-items: end; margin: 6px 0 18px; }
+  .degrau { background: var(--preto); border: 1px solid var(--borda); border-radius: 14px 14px 6px 6px; padding: 12px 8px; text-align: center; min-width: 0; }
+  .degrau .med { font-size: 1.7rem; line-height: 1; }
+  .degrau .nome { font-weight: 700; font-size: .9rem; margin-top: 6px; overflow-wrap: anywhere; }
+  .degrau .pts { font-family: 'Bebas Neue', sans-serif; font-size: 1.6rem; line-height: 1; margin-top: 6px; }
+  .degrau.p1 { padding-top: 20px; border-color: var(--ouro); background: linear-gradient(180deg, #2b2310 0%, var(--preto) 70%); }
+  .degrau.p1 .pts { color: var(--ouro); font-size: 2rem; }
+  .degrau.p2 .pts { color: var(--prata); }
+  .degrau.p3 .pts { color: var(--bronze); }
+  .degrau.vazio { visibility: hidden; }
+  /* Lista */
+  .lista { background: var(--preto); border: 1px solid var(--borda); border-radius: 14px; overflow: hidden; }
+  .linha { display: grid; grid-template-columns: 38px 1fr auto 18px; gap: 10px; align-items: center; padding: 12px 14px; border-bottom: 1px solid var(--borda); cursor: pointer; }
+  .linha:last-child { border-bottom: none; }
+  .pos { font-family: 'Bebas Neue', sans-serif; font-size: 1.6rem; text-align: center; color: var(--laranja); }
+  .pos.sem { color: var(--sub); font-size: 1.2rem; }
+  .nome { font-weight: 700; overflow-wrap: anywhere; }
+  .atl { color: var(--sub); font-size: .8rem; }
+  .tot { font-family: 'Bebas Neue', sans-serif; font-size: 1.6rem; text-align: right; }
+  .seta { color: var(--sub); transition: transform .2s; font-size: .8rem; }
+  .linha.aberta .seta { transform: rotate(90deg); }
+  .det { display: none; grid-column: 1 / -1; margin-top: 8px; }
+  .linha.aberta .det { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+  .wod { background: var(--fundo); border: 1px solid var(--borda); border-radius: 10px; padding: 8px; text-align: center; }
+  .wod .t { color: var(--sub); font-size: .68rem; text-transform: uppercase; letter-spacing: .5px; }
+  .wod .s { font-weight: 700; margin-top: 2px; }
+  .wod .p { color: var(--laranja); font-size: .75rem; font-weight: 600; }
+  /* Baterias */
+  .bat { background: var(--preto); border: 1px solid var(--borda); border-radius: 14px; overflow: hidden; margin-bottom: 12px; }
+  .bat.agora { border-color: var(--laranja); box-shadow: 0 0 0 1px var(--laranja); }
+  .bat-topo { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 10px 14px; background: #191919; border-bottom: 1px solid var(--borda); }
+  .bat-topo strong { font-family: 'Bebas Neue', sans-serif; font-size: 1.4rem; letter-spacing: .5px; }
+  .bat-topo .hora { font-weight: 700; }
+  .st { font-size: .7rem; font-weight: 700; padding: 3px 8px; border-radius: 6px; text-transform: uppercase; letter-spacing: .3px; }
+  .st-agora { background: var(--laranja); color: #fff; }
+  .st-concluida { background: #1B5E20; color: #C8E6C9; }
+  .st-parcial { background: #5A4300; color: #FFE082; }
+  .st-aguardando { background: #2a2a2a; color: var(--sub); }
+  .raia { display: grid; grid-template-columns: 30px 1fr; gap: 10px; padding: 10px 14px; border-bottom: 1px solid var(--borda); }
+  .raia:last-child { border-bottom: none; }
+  .raia-n { font-family: 'Bebas Neue', sans-serif; font-size: 1.4rem; color: var(--sub); text-align: center; line-height: 1.2; }
+  .placar { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+  .placar span { background: var(--fundo); border: 1px solid var(--borda); border-radius: 6px; padding: 2px 8px; font-size: .78rem; font-weight: 600; }
+  .placar span b { color: var(--laranja); font-weight: 700; margin-right: 4px; }
+  .vazio { text-align: center; color: var(--sub); padding: 50px 10px; }
+  .nota { color: var(--sub); font-size: .78rem; text-align: center; margin-top: 16px; }
+  .spinner { width: 36px; height: 36px; border: 4px solid var(--borda); border-top-color: var(--laranja); border-radius: 50%; animation: gira .8s linear infinite; margin: 60px auto; }
+  @keyframes gira { to { transform: rotate(360deg); } }
+  .hidden { display: none !important; }
+  footer { text-align: center; color: #555; font-size: .75rem; padding: 0 16px 30px; }
+</style>
+</head>
+<body>
+
+<header>
+  <img id="logo" class="hidden" alt="">
+  <h1 id="titulo">Leader<span>board</span></h1>
+  <div class="info" id="info"></div>
+  <div class="ao-vivo" id="ao-vivo"><i></i><span id="atualizado">Carregando...</span></div>
+  <nav>
+    <button data-aba="ranking" class="ativo">Ranking</button>
+    <button data-aba="baterias">Baterias</button>
+  </nav>
+</header>
+
+<main>
+  <div id="carregando"><div class="spinner"></div></div>
+  <section id="aba-ranking" class="hidden">
+    <div class="chips" id="chips"></div>
+    <div id="podio"></div>
+    <div id="lista"></div>
+    <p class="nota">Toque numa linha para ver os WODs. Pontos por colocação em cada WOD (1º=100, 2º=94, 3º=88...).<br>Empate: mais 1º lugares, depois mais 2º, depois melhor colocação no WOD 3.</p>
+  </section>
+  <section id="aba-baterias" class="hidden"></section>
+</main>
+
+<footer>Roque Box · Goiânia</footer>
+
+<script>
+/* ======= CONFIGURAÇÃO ======= */
+const API_URL = '1eA4DIqnNH3x6FOHeIQtgPgBTm3GOYkL4dAqY1qjnmz0'; // a MESMA URL do inscricao.html (termina em /exec)
+const ATUALIZAR_A_CADA = 30; // segundos
+/* ============================ */
+
+const params = new URLSearchParams(location.search);
+const ID_EVENTO = params.get('evento') || '';
+let dados = null, cat = '', aba = params.get('aba') === 'baterias' ? 'baterias' : 'ranking';
+const abertos = new Set();
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const MED = { 1: '🥇', 2: '🥈', 3: '🥉' };
+
+try { cat = localStorage.getItem('lb-cat-' + ID_EVENTO) || ''; } catch (e) {}
+
+async function carregar() {
+  try {
+    const r = await fetch(API_URL + '?' + new URLSearchParams({ acao: 'ranking', evento: ID_EVENTO }));
+    const j = await r.json();
+    if (!j.ok) throw new Error(j.erro || 'Erro ao carregar.');
+    dados = j;
+    $('ao-vivo').classList.remove('erro');
+    $('atualizado').textContent = 'Ao vivo · atualizado às ' + j.atualizadoEm;
+    cabecalho();
+    render();
+  } catch (e) {
+    $('ao-vivo').classList.add('erro');
+    $('atualizado').textContent = dados ? 'Sem conexão · tentando de novo...' : e.message;
+    if (!dados) { $('carregando').innerHTML = `<div class="vazio">${esc(e.message)}</div>`; }
+  }
+}
+
+function cabecalho() {
+  const ev = dados.evento;
+  document.title = 'Leaderboard | ' + ev.nome;
+  $('titulo').textContent = ev.nome;
+  $('info').textContent = [ev.data, ev.local].filter(Boolean).join(' · ');
+  if (ev.logo) { $('logo').src = ev.logo; $('logo').classList.remove('hidden'); }
+}
+
+function render() {
+  $('carregando').classList.add('hidden');
+  document.querySelectorAll('nav button').forEach(b => b.classList.toggle('ativo', b.dataset.aba === aba));
+  $('aba-ranking').classList.toggle('hidden', aba !== 'ranking');
+  $('aba-baterias').classList.toggle('hidden', aba !== 'baterias');
+  if (aba === 'ranking') renderRanking(); else renderBaterias();
+}
+
+/* ---------- Ranking ---------- */
+function renderRanking() {
+  const rk = dados.ranking;
+  if (!rk.length) { $('chips').innerHTML = ''; $('podio').innerHTML = ''; $('lista').innerHTML = '<div class="vazio">O ranking aparece aqui assim que os primeiros resultados forem publicados.</div>'; return; }
+  if (!rk.some(c => c.categoria === cat)) cat = rk[0].categoria;
+  $('chips').innerHTML = rk.map(c => `<button class="chip ${c.categoria === cat ? 'ativo' : ''}" data-cat="${esc(c.categoria)}">${esc(c.categoria)}</button>`).join('');
+  const atual = rk.find(c => c.categoria === cat);
+  const comPos = atual.equipes.filter(e => e.posicao);
+
+  if (comPos.length) {
+    const top = [comPos.find(e => e.posicao === 2) || comPos[1], comPos[0], comPos.find(e => e.posicao === 3) || comPos[2]];
+    const lugar = ['p2', 'p1', 'p3'];
+    $('podio').innerHTML = `<div class="podio">${top.map((e, i) => e
+      ? `<div class="degrau ${lugar[i]}"><div class="med">${MED[e.posicao] || e.posicao + 'º'}</div><div class="nome">${esc(e.Equipe)}</div><div class="pts">${e.total}</div></div>`
+      : `<div class="degrau vazio"></div>`).join('')}</div>`;
+  } else {
+    $('podio').innerHTML = '';
+  }
+
+  $('lista').innerHTML = `<div class="lista">${atual.equipes.map((e, i) => {
+    const id = cat + '|' + e.Equipe;
+    return `<div class="linha ${abertos.has(id) ? 'aberta' : ''}" data-id="${esc(id)}">
+      <div class="pos ${e.posicao ? '' : 'sem'}">${e.posicao ? e.posicao + 'º' : '—'}</div>
+      <div><div class="nome">${esc(e.Equipe)}</div>${e.Atletas ? `<div class="atl">${esc(e.Atletas)}</div>` : ''}</div>
+      <div class="tot">${e.posicao ? e.total : '<span class="atl">aguardando</span>'}</div>
+      <div class="seta">▶</div>
+      <div class="det">${dados.wods.map((w, j) => {
+        const x = e.wods[w.id];
+        return `<div class="wod"><div class="t">WOD ${j + 1}</div><div class="s">${x ? esc(x.exibir) : '—'}</div><div class="p">${x ? x.pos + 'º · ' + x.pontos + ' pts' : '&nbsp;'}</div></div>`;
+      }).join('')}</div>
+    </div>`;
+  }).join('')}</div>`;
+}
+
+/* ---------- Baterias ---------- */
+function renderBaterias() {
+  const bats = dados.baterias;
+  if (!bats.length) { $('aba-baterias').innerHTML = '<div class="vazio">As baterias ainda não foram divulgadas.</div>'; return; }
+  const rot = { agora: 'Agora', concluida: 'Concluída', parcial: 'Parcial', aguardando: 'A seguir' };
+  // "A seguir" só para a próxima; as demais ficam sem selo
+  const prox = bats.find(b => b.status === 'aguardando');
+  $('aba-baterias').innerHTML = bats.map(b => `
+    <div class="bat ${b.status === 'agora' ? 'agora' : ''}" ${b.status === 'agora' ? 'id="bat-agora"' : ''}>
+      <div class="bat-topo"><strong>Bateria ${b.bateria}</strong>
+        <span>${b.status !== 'aguardando' || b === prox ? `<span class="st st-${b.status}">${rot[b.status]}</span> ` : ''}<span class="hora">${esc(b.horario)}</span></span></div>
+      ${b.raias.map(r => `<div class="raia"><div class="raia-n">${r.raia}</div><div>
+        <div class="nome">${esc(r.equipe)}</div><div class="atl">${r.atletas ? esc(r.atletas) + ' · ' : ''}${esc(r.categoria)}</div>
+        ${r.placar ? `<div class="placar">${r.placar.map((s, j) => `<span><b>W${j + 1}</b>${esc(s)}</span>`).join('')}</div>` : ''}
+      </div></div>`).join('')}
+    </div>`).join('') + '<p class="nota">Horários previstos. Os placares aparecem quando a organização publica a bateria.</p>';
+}
+
+/* ---------- Interação ---------- */
+document.querySelectorAll('nav button').forEach(b => b.onclick = () => {
+  aba = b.dataset.aba; render();
+  if (aba === 'baterias' && $('bat-agora')) $('bat-agora').scrollIntoView({ behavior: 'smooth', block: 'start' });
+});
+$('chips').addEventListener('click', e => {
+  const c = e.target.closest('[data-cat]'); if (!c) return;
+  cat = c.dataset.cat;
+  try { localStorage.setItem('lb-cat-' + ID_EVENTO, cat); } catch (err) {}
+  renderRanking();
+});
+$('lista').addEventListener('click', e => {
+  const l = e.target.closest('.linha'); if (!l) return;
+  const id = l.dataset.id;
+  abertos.has(id) ? abertos.delete(id) : abertos.add(id);
+  l.classList.toggle('aberta');
+});
+
+if (API_URL.startsWith('COLE')) {
+  $('carregando').innerHTML = '<div class="vazio">Configure a API_URL no arquivo leaderboard.html.</div>';
+} else if (!ID_EVENTO) {
+  $('carregando').innerHTML = '<div class="vazio">Link incompleto: falta ?evento=ID no endereço.</div>';
+} else {
+  carregar();
+  setInterval(() => { if (!document.hidden) carregar(); }, ATUALIZAR_A_CADA * 1000);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) carregar(); });
+}
+</script>
+</body>
+</html>
