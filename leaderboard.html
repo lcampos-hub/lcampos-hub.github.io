@@ -83,6 +83,26 @@
   .spinner { width: 36px; height: 36px; border: 4px solid var(--borda); border-top-color: var(--laranja); border-radius: 50%; animation: gira .8s linear infinite; margin: 60px auto; }
   @keyframes gira { to { transform: rotate(360deg); } }
   .hidden { display: none !important; }
+  .card-f { background: var(--preto); border: 1px solid var(--borda); border-radius: 14px; padding: 16px; margin-bottom: 14px; }
+  .card-f h2 { font-family: 'Bebas Neue', sans-serif; font-size: 1.6rem; color: var(--laranja); letter-spacing: .5px; }
+  .card-f label { display: block; font-size: .8rem; font-weight: 600; color: var(--sub); margin: 12px 0 4px; }
+  .card-f input, .card-f textarea, .card-f select { width: 100%; background: var(--fundo); border: 1px solid var(--borda); color: var(--texto); border-radius: 10px; padding: 12px; font-size: 16px; font-family: inherit; }
+  .card-f input:focus, .card-f textarea:focus { outline: none; border-color: var(--laranja); }
+  .btn { display: block; width: 100%; background: var(--laranja); color: #fff; border: none; border-radius: 12px; padding: 14px; font-weight: 700; font-size: 1rem; cursor: pointer; margin-top: 14px; font-family: inherit; }
+  .btn.sec { background: transparent; border: 1px solid var(--borda); color: var(--texto); }
+  .btn:disabled { opacity: .55; cursor: wait; }
+  .alerta { border-radius: 10px; padding: 12px; font-size: .9rem; margin-top: 12px; border: 1px solid #FF5252; background: #2a1010; }
+  .alerta.ok { border-color: var(--ok); background: #102a14; }
+  .alerta.info { border-color: var(--laranja); background: var(--laranja-esc); }
+  .prazo { font-family: 'Bebas Neue', sans-serif; font-size: 2.2rem; color: var(--laranja); text-align: center; line-height: 1; margin-top: 4px; }
+  .wods-esc { display: grid; gap: 8px; margin-top: 6px; }
+  .wods-esc label { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin: 0; padding: 12px; border: 1px solid var(--borda); border-radius: 10px; color: var(--texto); font-size: .95rem; font-weight: 600; cursor: pointer; }
+  .wods-esc input { width: auto; accent-color: var(--laranja); margin-right: 8px; }
+  .wods-esc label.on { border-color: var(--laranja); background: var(--laranja-esc); }
+  .wods-esc label.off { opacity: .5; cursor: not-allowed; }
+  .hist { display: grid; grid-template-columns: 1fr auto; gap: 4px 10px; padding: 10px 0; border-bottom: 1px solid var(--borda); }
+  .hist:last-child { border-bottom: none; }
+  .revisao { display: inline-block; background: #5A4300; color: #FFE082; font-size: .65rem; font-weight: 700; padding: 1px 6px; border-radius: 5px; text-transform: uppercase; letter-spacing: .3px; vertical-align: middle; margin-left: 4px; }
   footer { text-align: center; color: #555; font-size: .75rem; padding: 0 16px 30px; }
 </style>
 </head>
@@ -96,6 +116,7 @@
   <nav>
     <button data-aba="ranking" class="ativo">Ranking</button>
     <button data-aba="baterias">Baterias</button>
+    <button data-aba="contestar">Contestar</button>
   </nav>
 </header>
 
@@ -105,22 +126,36 @@
     <div class="chips" id="chips"></div>
     <div id="podio"></div>
     <div id="lista"></div>
-    <p class="nota">Toque numa linha para ver os WODs. Pontos por colocação em cada WOD (1º=100, 2º=94, 3º=88...).<br>Empate: mais 1º lugares, depois mais 2º, depois melhor colocação no WOD 3.</p>
+    <p class="nota">“Em revisão”: há uma contestação aberta; o resultado pode mudar.<br>Toque numa linha para ver os WODs. Pontos por colocação em cada WOD (1º=100, 2º=94, 3º=88...).<br>Empate: mais 1º lugares, depois mais 2º, depois melhor colocação no WOD 3.</p>
   </section>
   <section id="aba-baterias" class="hidden"></section>
+  <section id="aba-contestar" class="hidden">
+    <form class="card-f" id="ct-login" novalidate>
+      <h2>Contestar resultado</h2>
+      <p class="atl" style="margin-bottom:10px">Você pode contestar o seu próprio resultado em até <strong>30 minutos</strong> depois que a sua bateria for publicada.</p>
+      <label for="ct-codigo">Código de inscrição</label>
+      <input id="ct-codigo" maxlength="6" autocapitalize="characters" autocomplete="off" placeholder="Ex.: K7M2QP">
+      <label for="ct-cpf">CPF de um dos atletas</label>
+      <input id="ct-cpf" inputmode="numeric" maxlength="14" placeholder="000.000.000-00">
+      <div class="alerta hidden" id="ct-erro-login"></div>
+      <button class="btn" id="ct-entrar" type="submit">Continuar</button>
+      <p class="atl" style="margin-top:10px">O código está no e-mail/print da sua inscrição. Inscrição feita na hora com a organização? Fale com a mesa de resultados.</p>
+    </form>
+    <div id="ct-area" class="hidden"></div>
+  </section>
 </main>
 
 <footer>Roque Box · Goiânia</footer>
 
 <script>
 /* ======= CONFIGURAÇÃO ======= */
-const API_URL = 'https://script.google.com/macros/s/AKfycbzuIe-fcFB4OfEydJi2lNZ_LGyGjQ9vKAmg8tpZ5wotNWuxVG1zrTjmsTPV34OVZj60/exec'; // a MESMA URL do inscricao.html (termina em /exec)
+const API_URL = 'COLE_AQUI_A_URL_DO_APP_DA_WEB'; // a MESMA URL do inscricao.html (termina em /exec)
 const ATUALIZAR_A_CADA = 30; // segundos
 /* ============================ */
 
 const params = new URLSearchParams(location.search);
 const ID_EVENTO = params.get('evento') || '';
-let dados = null, cat = '', aba = params.get('aba') === 'baterias' ? 'baterias' : 'ranking';
+let dados = null, cat = '', aba = ['baterias', 'contestar'].includes(params.get('aba')) ? params.get('aba') : 'ranking';
 const abertos = new Set();
 
 const $ = id => document.getElementById(id);
@@ -159,7 +194,8 @@ function render() {
   document.querySelectorAll('nav button').forEach(b => b.classList.toggle('ativo', b.dataset.aba === aba));
   $('aba-ranking').classList.toggle('hidden', aba !== 'ranking');
   $('aba-baterias').classList.toggle('hidden', aba !== 'baterias');
-  if (aba === 'ranking') renderRanking(); else renderBaterias();
+  $('aba-contestar').classList.toggle('hidden', aba !== 'contestar');
+  if (aba === 'ranking') renderRanking(); else if (aba === 'baterias') renderBaterias();
 }
 
 /* ---------- Ranking ---------- */
@@ -185,12 +221,13 @@ function renderRanking() {
     const id = cat + '|' + e.Equipe;
     return `<div class="linha ${abertos.has(id) ? 'aberta' : ''}" data-id="${esc(id)}">
       <div class="pos ${e.posicao ? '' : 'sem'}">${e.posicao ? e.posicao + 'º' : '—'}</div>
-      <div><div class="nome">${esc(e.Equipe)}</div>${e.Atletas ? `<div class="atl">${esc(e.Atletas)}</div>` : ''}</div>
+      <div><div class="nome">${esc(e.Equipe)}${e.revisao && e.revisao.length ? '<span class="revisao">em revisão</span>' : ''}</div>${e.Atletas ? `<div class="atl">${esc(e.Atletas)}</div>` : ''}</div>
       <div class="tot">${e.posicao ? e.total : '<span class="atl">aguardando</span>'}</div>
       <div class="seta">▶</div>
       <div class="det">${dados.wods.map((w, j) => {
         const x = e.wods[w.id];
-        return `<div class="wod"><div class="t">WOD ${j + 1}</div><div class="s">${x ? esc(x.exibir) : '—'}</div><div class="p">${x ? x.pos + 'º · ' + x.pontos + ' pts' : '&nbsp;'}</div></div>`;
+        const rev = e.revisao && e.revisao.includes(w.id);
+        return `<div class="wod"><div class="t">WOD ${j + 1}</div><div class="s">${x ? esc(x.exibir) : '—'}</div><div class="p">${x ? x.pos + 'º · ' + x.pontos + ' pts' : '&nbsp;'}</div>${rev ? '<span class="revisao">em revisão</span>' : ''}</div>`;
       }).join('')}</div>
     </div>`;
   }).join('')}</div>`;
@@ -208,10 +245,117 @@ function renderBaterias() {
       <div class="bat-topo"><strong>Bateria ${b.bateria}</strong>
         <span>${b.status !== 'aguardando' || b === prox ? `<span class="st st-${b.status}">${rot[b.status]}</span> ` : ''}<span class="hora">${esc(b.horario)}</span></span></div>
       ${b.raias.map(r => `<div class="raia"><div class="raia-n">${r.raia}</div><div>
-        <div class="nome">${esc(r.equipe)}</div><div class="atl">${r.atletas ? esc(r.atletas) + ' · ' : ''}${esc(r.categoria)}</div>
+        <div class="nome">${esc(r.equipe)}${r.revisao && r.revisao.length ? '<span class="revisao">em revisão</span>' : ''}</div><div class="atl">${r.atletas ? esc(r.atletas) + ' · ' : ''}${esc(r.categoria)}</div>
         ${r.placar ? `<div class="placar">${r.placar.map((s, j) => `<span><b>W${j + 1}</b>${esc(s)}</span>`).join('')}</div>` : ''}
       </div></div>`).join('')}
     </div>`).join('') + '<p class="nota">Horários previstos. Os placares aparecem quando a organização publica a bateria.</p>';
+}
+
+/* ---------- Contestar ---------- */
+let ct = null, ctCod = '', ctCpf = '', ctTimer = null;
+const dig = s => String(s || '').replace(/\D/g, '');
+function mascaraCPF(v) { v = dig(v).slice(0, 11); return v.replace(/(\d{3})(\d)/, '$1.$2').replace(/(\d{3})(\d)/, '$1.$2').replace(/(\d{3})(\d{1,2})$/, '$1-$2'); }
+function mascaraTel(v) { v = dig(v).slice(0, 11); if (v.length <= 2) return v ? '(' + v : ''; if (v.length <= 6) return `(${v.slice(0, 2)}) ${v.slice(2)}`; if (v.length <= 10) return `(${v.slice(0, 2)}) ${v.slice(2, 6)}-${v.slice(6)}`; return `(${v.slice(0, 2)}) ${v.slice(2, 7)}-${v.slice(7)}`; }
+function alertaEm(el, msg, tipo) { el.className = 'alerta' + (tipo ? ' ' + tipo : ''); el.textContent = msg; }
+async function ocupadoBtn(btn, txt, fn) { const t = btn.textContent; btn.disabled = true; btn.textContent = txt; try { await fn(); } finally { btn.disabled = false; btn.textContent = t; } }
+
+$('ct-codigo').addEventListener('input', e => { e.target.value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ''); });
+$('ct-cpf').addEventListener('input', e => { e.target.value = mascaraCPF(e.target.value); });
+
+$('ct-login').addEventListener('submit', e => {
+  e.preventDefault();
+  const cod = $('ct-codigo').value.trim(), cpf = dig($('ct-cpf').value);
+  if (cod.length !== 6 || cpf.length !== 11) { alertaEm($('ct-erro-login'), 'Informe o código de 6 caracteres e o CPF.'); return; }
+  ocupadoBtn($('ct-entrar'), 'Consultando...', async () => {
+    try { ctCod = cod; ctCpf = cpf; await consultarCt(); $('ct-erro-login').className = 'alerta hidden'; }
+    catch (err) { alertaEm($('ct-erro-login'), err.message); }
+  });
+});
+
+async function consultarCt() {
+  const r = await fetch(API_URL + '?' + new URLSearchParams({ acao: 'contestacao', codigo: ctCod, cpf: ctCpf }));
+  const j = await r.json();
+  if (!j.ok) throw new Error(j.erro || 'Erro ao consultar.');
+  ct = j;
+  ct.fimLocal = Date.now() + j.segundosRestantes * 1000;
+  $('ct-login').classList.add('hidden');
+  $('ct-area').classList.remove('hidden');
+  renderCt();
+}
+
+function renderCt(msgOk) {
+  clearInterval(ctTimer);
+  const pend = new Set(ct.contestacoes.filter(c => c.status === 'PENDENTE').map(c => c.wod));
+  const aberta = ct.aberta && Date.now() < ct.fimLocal;
+  const hist = ct.contestacoes.length ? `<div class="card-f"><h2>Suas contestações</h2>${ct.contestacoes.map(c => `
+      <div class="hist"><div><strong>${esc(c.protocolo)}</strong> · ${esc(c.wod)}<div class="atl">${esc(c.data)}</div></div>
+      <span class="st st-${c.status === 'DEFERIDA' ? 'concluida' : c.status === 'PENDENTE' ? 'parcial' : 'aguardando'}">${esc(c.status === 'PENDENTE' ? 'em análise' : c.status)}</span>
+      ${c.resposta ? `<div class="atl" style="grid-column:1/-1;color:var(--texto)">💬 ${esc(c.resposta)}</div>` : ''}</div>`).join('')}</div>` : '';
+
+  let corpo;
+  if (!ct.publicado) {
+    corpo = `<div class="alerta info">Seu resultado ainda não foi publicado. Volte aqui depois que a sua bateria${ct.bateria ? ' (' + ct.bateria + ')' : ''} for publicada.</div>`;
+  } else if (!aberta) {
+    corpo = `<div class="alerta">O prazo para contestar terminou${ct.prazo ? ' às ' + esc(ct.prazo) : ''}. Contestações só são aceitas até ${ct.minutos} minutos depois da publicação da bateria.</div>`;
+  } else {
+    corpo = `<form class="card-f" id="ct-form" novalidate>
+      <p class="atl" style="text-align:center">Tempo restante para contestar</p>
+      <div class="prazo" id="ct-relogio"></div>
+      <label>Qual WOD?</label>
+      <div class="wods-esc">${ct.wods.map(w => {
+        const bloq = w.resultado === '—' || pend.has(w.nome);
+        return `<label class="${bloq ? 'off' : ''}"><span><input type="radio" name="ct-wod" value="${w.id}" ${bloq ? 'disabled' : ''}>${esc(w.nome)}</span>
+          <span class="atl">${pend.has(w.nome) ? 'já contestado' : esc(w.resultado)}</span></label>`;
+      }).join('')}</div>
+      <label for="ct-motivo">Motivo</label>
+      <textarea id="ct-motivo" rows="4" maxlength="1000" placeholder="Descreva o que está errado. Ex.: meu tempo foi 15:20, não 15:50 — o juiz anotou errado."></textarea>
+      <label for="ct-video">Link do vídeo (opcional)</label>
+      <input id="ct-video" type="url" placeholder="https://instagram.com/... ou link do Drive/YouTube">
+      <label for="ct-zap">Seu WhatsApp</label>
+      <input id="ct-zap" inputmode="numeric" maxlength="15" placeholder="(62) 90000-0000">
+      <div class="alerta hidden" id="ct-erro"></div>
+      <button class="btn" id="ct-enviar" type="submit">Enviar contestação</button>
+    </form>`;
+  }
+
+  $('ct-area').innerHTML = `<div class="card-f"><h2>${esc(ct.equipe)}</h2><p class="atl">${esc(ct.categoria)}${ct.bateria ? ' · Bateria ' + ct.bateria : ''}</p>
+      ${msgOk ? `<div class="alerta ok">${msgOk}</div>` : ''}</div>
+    ${corpo}${hist}
+    <button class="btn sec" id="ct-sair" type="button">Sair</button>`;
+
+  if (msgOk) $('ct-area').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  $('ct-sair').onclick = () => { ct = null; clearInterval(ctTimer); $('ct-area').classList.add('hidden'); $('ct-login').classList.remove('hidden'); };
+  if (!$('ct-form')) return;
+
+  const relogio = () => {
+    const s = Math.max(0, Math.round((ct.fimLocal - Date.now()) / 1000));
+    $('ct-relogio').textContent = String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0');
+    if (!s) { ct.aberta = false; renderCt(); }
+  };
+  relogio(); ctTimer = setInterval(relogio, 1000);
+  $('ct-zap').addEventListener('input', e => { e.target.value = mascaraTel(e.target.value); });
+  $('ct-form').querySelectorAll('input[name=ct-wod]').forEach(i => i.addEventListener('change', () =>
+    $('ct-form').querySelectorAll('.wods-esc label').forEach(l => l.classList.toggle('on', l.contains(i) && i.checked))));
+
+  $('ct-form').addEventListener('submit', e => {
+    e.preventDefault();
+    const wod = ($('ct-form').querySelector('input[name=ct-wod]:checked') || {}).value;
+    const motivo = $('ct-motivo').value.trim(), video = $('ct-video').value.trim(), zap = dig($('ct-zap').value);
+    const erro = !wod ? 'Escolha o WOD.' : motivo.length < 15 ? 'Explique o motivo com mais detalhe (mínimo 15 caracteres).'
+      : video && !/^https?:\/\/\S+$/i.test(video) ? 'Cole o link completo do vídeo (começando com https://).'
+      : zap.length < 10 ? 'Informe seu WhatsApp com DDD.' : '';
+    if (erro) { alertaEm($('ct-erro'), erro); return; }
+    ocupadoBtn($('ct-enviar'), 'Enviando...', async () => {
+      try {
+        const r = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ acao: 'contestar', codigo: ctCod, cpf: ctCpf, wod, motivo, video, whatsapp: zap }) });
+        const j = await r.json();
+        if (!j.ok) throw new Error(j.erro || 'Erro ao enviar.');
+        await consultarCt();
+        renderCt(`Contestação enviada! Protocolo <strong>${esc(j.protocolo)}</strong>. A organização vai analisar e responder por aqui e pelo WhatsApp.`);
+        carregar();
+      } catch (err) { alertaEm($('ct-erro'), err.message); }
+    });
+  });
 }
 
 /* ---------- Interação ---------- */
