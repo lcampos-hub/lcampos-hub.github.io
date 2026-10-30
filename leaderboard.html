@@ -61,6 +61,9 @@
   .wod .t { color: var(--sub); font-size: .68rem; text-transform: uppercase; letter-spacing: .5px; }
   .wod .s { font-weight: 700; margin-top: 2px; }
   .wod .p { color: var(--laranja); font-size: .75rem; font-weight: 600; }
+  .wod .movs div { white-space: nowrap; }
+  .wod .movs { margin-top: 6px; border-top: 1px solid var(--borda); padding-top: 5px; font-size: .66rem; color: var(--sub); line-height: 1.5; }
+  .wod .movs b { color: var(--texto); font-weight: 600; }
   /* Baterias */
   .bat { background: var(--preto); border: 1px solid var(--borda); border-radius: 14px; overflow: hidden; margin-bottom: 12px; }
   .bat.agora { border-color: var(--laranja); box-shadow: 0 0 0 1px var(--laranja); }
@@ -126,7 +129,7 @@
     <div class="chips" id="chips"></div>
     <div id="podio"></div>
     <div id="lista"></div>
-    <p class="nota">“Em revisão”: há uma contestação aberta; o resultado pode mudar.<br>Toque numa linha para ver os WODs. Pontos por colocação em cada WOD (1º=100, 2º=94, 3º=88...).<br>Empate: mais 1º lugares, depois mais 2º, depois melhor colocação no WOD 3.</p>
+    <p class="nota">“Em revisão”: há uma contestação aberta; o resultado pode mudar.<br>Toque numa linha para ver os WODs. Pontos por colocação (1º=100, 2º=94, 3º=88...): no WOD 1 cada movimento pontua separado (até 300); WODs 2 e 3 valem até 100 cada.<br>Empate: mais 1º lugares, depois mais 2º, depois melhor colocação no WOD 3.</p>
   </section>
   <section id="aba-baterias" class="hidden"></section>
   <section id="aba-contestar" class="hidden">
@@ -227,7 +230,9 @@ function renderRanking() {
       <div class="det">${dados.wods.map((w, j) => {
         const x = e.wods[w.id];
         const rev = e.revisao && e.revisao.includes(w.id);
-        return `<div class="wod"><div class="t">WOD ${j + 1}</div><div class="s">${x ? esc(x.exibir) : '—'}</div><div class="p">${x ? x.pos + 'º · ' + x.pontos + ' pts' : '&nbsp;'}</div>${rev ? '<span class="revisao">em revisão</span>' : ''}</div>`;
+        const pts = !x ? '&nbsp;' : x.movs ? x.pontos + ' pts' : x.pos + 'º · ' + x.pontos + ' pts';
+        const movs = x && x.movs ? `<div class="movs">${x.movs.map(m => `<div>${esc(({ Deadlift: 'DL', Clean: 'CL', Thruster: 'TH' })[m.nome] || m.nome.slice(0, 2).toUpperCase())} <b>${esc(m.exibir.replace(' kg', ''))}</b> · ${m.pos}º</div>`).join('')}</div>` : '';
+        return `<div class="wod"><div class="t">WOD ${j + 1}</div><div class="s">${x ? esc(x.exibir) : '—'}</div><div class="p">${pts}</div>${movs}${rev ? '<span class="revisao">em revisão</span>' : ''}</div>`;
       }).join('')}</div>
     </div>`;
   }).join('')}</div>`;
