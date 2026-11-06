@@ -67,6 +67,12 @@
   .termo p + p { margin-top: 10px; }
   .termo strong { color: var(--laranja); font-weight: 600; white-space: nowrap; }
   .lacuna { color: var(--sub); }
+  .btn.ck { background: transparent; border: 1px solid var(--ok); color: var(--ok); }
+  .ck-atleta { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 12px 0; border-bottom: 1px solid var(--borda); }
+  .ck-atleta:last-of-type { border-bottom: none; }
+  .ck-tag { font-size: .75rem; font-weight: 700; padding: 3px 9px; border-radius: 6px; white-space: nowrap; }
+  .ck-tag.ok { background: #1B5E20; color: #C8E6C9; }
+  .ck-tag.nao { background: #333; color: #bbb; }
   footer { text-align: center; color: #555; font-size: .75rem; padding: 10px 16px 30px; }
 </style>
 </head>
@@ -90,12 +96,14 @@
   <section class="tela hidden" id="tela-erro">
     <div class="alerta erro" id="erro-geral"></div>
     <button class="btn sec" onclick="location.reload()">Tentar novamente</button>
+    <button class="btn ck mt" type="button" data-ir="tela-checkin">✓ Check-in · confirmar presença</button>
   </section>
 
   <!-- LISTA DE EVENTOS -->
   <section class="tela hidden" id="tela-eventos">
     <div id="lista-eventos"></div>
     <button class="btn sec mt" data-ir="tela-consulta">Já me inscrevi / enviar comprovante</button>
+    <button class="btn ck mt" type="button" data-ir="tela-checkin">✓ Check-in · confirmar presença</button>
   </section>
 
   <!-- FORMULÁRIO -->
@@ -134,6 +142,7 @@
       <div class="alerta erro hidden" id="form-erro"></div>
       <button class="btn" id="btn-inscrever" type="submit">Continuar para pagamento</button>
       <button class="btn sec mt" type="button" data-ir="tela-consulta">Já me inscrevi / enviar comprovante</button>
+      <button class="btn ck mt" type="button" data-ir="tela-checkin">✓ Check-in · confirmar presença</button>
     </form>
   </section>
 
@@ -211,6 +220,20 @@
       <div class="alerta info mt hidden" id="s-falta" style="text-align:left"></div>
       <p class="sub mt">Para acompanhar, use “Já me inscrevi” com esse código e seu CPF.</p>
     </div>
+  </section>
+
+  <!-- CHECK-IN -->
+  <section class="tela hidden" id="tela-checkin">
+    <form class="card" id="form-checkin" novalidate>
+      <h2>Check-in</h2>
+      <p class="sub">Confirme a sua presença no campeonato. Na dupla, cada atleta faz o próprio check-in com o seu CPF.</p>
+      <label for="ck-cpf">Seu CPF</label>
+      <input id="ck-cpf" type="text" inputmode="numeric" maxlength="14" placeholder="000.000.000-00" autocomplete="off">
+      <div class="alerta erro hidden mt" id="ck-erro"></div>
+      <button class="btn mt" id="btn-ck-buscar" type="submit">Buscar minha inscrição</button>
+    </form>
+    <div id="ck-resultado"></div>
+    <button class="btn sec mt" type="button" onclick="location.href = location.pathname + location.search.replace(/[?&]checkin(=[^&]*)?/, '')">Voltar</button>
   </section>
 
   <!-- CONSULTA -->
@@ -648,6 +671,59 @@ $('btn-voltar-form').addEventListener('click', () => {
   else location.href = location.pathname;
 });
 
+/* ---------- Check-in ---------- */
+let ckCpf = '';
+$('form-checkin').addEventListener('submit', async e => {
+  e.preventDefault();
+  $('ck-erro').classList.add('hidden');
+  const cpf = digitos($('ck-cpf').value);
+  if (!cpfValido(cpf)) { alerta($('ck-erro'), 'CPF inválido. Digite os 11 números.'); return; }
+  const btn = $('btn-ck-buscar');
+  carregando(btn, true, 'Buscando...');
+  try {
+    const r = await apiGet({ acao: 'checkin', cpf });
+    ckCpf = cpf;
+    renderCheckin(r.inscricoes);
+  } catch (err) {
+    $('ck-resultado').innerHTML = '';
+    alerta($('ck-erro'), err.message);
+  } finally {
+    carregando(btn, false);
+  }
+});
+
+function renderCheckin(lista, msgOk) {
+  $('ck-resultado').innerHTML = (msgOk ? `<div class="alerta ok">${esc(msgOk)}</div>` : '') + lista.map(i => {
+    const eu = i.atletas.find(a => a.eu);
+    let acao = '';
+    if (!i.pago) acao = '<div class="alerta info mt">Seu pagamento ainda não foi confirmado. O check-in libera depois da confirmação.</div>';
+    else if (eu && eu.ok) acao = `<div class="alerta ok mt">Sua presença está confirmada${eu.quando ? ' (' + esc(eu.quando) + ')' : ''}. ${i.completo ? 'Tudo certo, nos vemos no evento! 💪' : 'Falta o check-in do seu parceiro.'}</div>`;
+    else if (!i.checkinAberto) acao = '<div class="alerta info mt">O check-in deste evento ainda não está aberto. Fique de olho no Instagram da Roque Box.</div>';
+    else acao = `<button class="btn mt" type="button" data-ck-evento="${esc(i.idEvento)}">Confirmar minha presença</button>`;
+    return `<div class="card">
+      <h2>${esc(i.evento)}</h2>
+      <p class="sub">${esc([i.data, i.categoria, i.equipe].filter(Boolean).join(' · '))}</p>
+      <div class="mt">${i.atletas.map(a => `<div class="ck-atleta"><span>${esc(a.nome)}${a.eu ? ' <span class="sub">(você)</span>' : ''}</span>
+        <span class="ck-tag ${a.ok ? 'ok' : 'nao'}">${a.ok ? '✓ Confirmado' : 'Pendente'}</span></div>`).join('')}</div>
+      ${acao}
+    </div>`;
+  }).join('');
+  $('ck-resultado').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+$('ck-resultado').addEventListener('click', async e => {
+  const b = e.target.closest('[data-ck-evento]');
+  if (!b) return;
+  carregando(b, true, 'Confirmando...');
+  try {
+    const r = await apiPost({ acao: 'checkin', cpf: ckCpf, idEvento: b.dataset.ckEvento });
+    renderCheckin(r.inscricoes, 'Check-in feito! ✓');
+  } catch (err) {
+    alerta($('ck-erro'), err.message);
+    carregando(b, false);
+  }
+});
+
 /* ---------- Início ---------- */
 async function abrirEvento(id) {
   mostrar('tela-carregando');
@@ -677,6 +753,7 @@ async function abrirEvento(id) {
 async function iniciar() {
   if (API_URL.startsWith('COLE')) { falha('Configure a API_URL no arquivo inscricao.html.'); return; }
   try {
+    if (params.get('checkin') !== null) { mostrar('tela-checkin'); $('ck-cpf').focus(); return; }
     if (params.get('codigo')) {
       $('c-codigo').value = params.get('codigo').toUpperCase();
       mostrar('tela-consulta');
