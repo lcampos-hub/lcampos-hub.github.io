@@ -26,7 +26,7 @@
   .ao-vivo.erro i { background: #FF5252; animation: none; }
   @keyframes pulso { 70% { box-shadow: 0 0 0 8px rgba(76,175,80,0); } 100% { box-shadow: 0 0 0 0 rgba(76,175,80,0); } }
   nav { display: flex; max-width: 640px; margin: 14px auto 0; }
-  nav button { flex: 1; background: none; border: none; color: var(--sub); font-family: 'Bebas Neue', sans-serif; font-size: 1.35rem; letter-spacing: 1px; padding: 8px 0 10px; border-bottom: 3px solid transparent; margin-bottom: -3px; cursor: pointer; }
+  nav button { flex: 1; background: none; border: none; color: var(--sub); font-family: 'Bebas Neue', sans-serif; font-size: 1.2rem; letter-spacing: .5px; padding: 8px 6px 10px; border-bottom: 3px solid transparent; margin-bottom: -3px; cursor: pointer; }
   nav button.ativo { color: var(--laranja); border-color: var(--laranja); }
   main { max-width: 640px; margin: 0 auto; padding: 16px 16px 60px; }
   .chips { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 6px; margin-bottom: 14px; scrollbar-width: none; }
@@ -64,6 +64,13 @@
   .wod .movs div { white-space: nowrap; }
   .wod .movs { margin-top: 6px; border-top: 1px solid var(--borda); padding-top: 5px; font-size: .66rem; color: var(--sub); line-height: 1.5; }
   .wod .movs b { color: var(--texto); font-weight: 600; }
+  .cargas { grid-column: 1 / -1; background: var(--fundo); border: 1px solid var(--borda); border-radius: 10px; padding: 8px 10px; }
+  .cargas .t { color: var(--sub); font-size: .68rem; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 4px; }
+  .cargas table { width: 100%; border-collapse: collapse; font-size: .8rem; }
+  .cargas th { color: var(--sub); font-weight: 600; font-size: .68rem; text-align: right; padding: 3px 4px; }
+  .cargas td { text-align: right; padding: 4px; border-top: 1px solid var(--borda); font-weight: 600; }
+  .cargas td:first-child, .cargas th:first-child { text-align: left; font-weight: 500; overflow-wrap: anywhere; }
+  .cargas tr.soma td { color: var(--laranja); font-weight: 700; }
   /* Baterias */
   .bat { background: var(--preto); border: 1px solid var(--borda); border-radius: 14px; overflow: hidden; margin-bottom: 12px; }
   .bat.agora { border-color: var(--laranja); box-shadow: 0 0 0 1px var(--laranja); }
@@ -106,6 +113,7 @@
   .hist { display: grid; grid-template-columns: 1fr auto; gap: 4px 10px; padding: 10px 0; border-bottom: 1px solid var(--borda); }
   .hist:last-child { border-bottom: none; }
   .revisao { display: inline-block; background: #5A4300; color: #FFE082; font-size: .65rem; font-weight: 700; padding: 1px 6px; border-radius: 5px; text-transform: uppercase; letter-spacing: .3px; vertical-align: middle; margin-left: 4px; }
+  .regras { display: inline-flex; align-items: center; gap: 6px; margin-top: 10px; background: var(--laranja-esc); border: 1px solid var(--laranja); color: var(--texto); text-decoration: none; font-weight: 600; font-size: .82rem; padding: 6px 14px; border-radius: 999px; }
   footer { text-align: center; color: #555; font-size: .75rem; padding: 0 16px 30px; }
 </style>
 </head>
@@ -115,7 +123,8 @@
   <img id="logo" class="hidden" alt="">
   <h1 id="titulo">Leader<span>board</span></h1>
   <div class="info" id="info"></div>
-  <div class="ao-vivo" id="ao-vivo"><i></i><span id="atualizado">Carregando...</span></div>
+  <div class="ao-vivo" id="ao-vivo"><i></i><span id="atualizado">Carregando...</span></div><br>
+  <a class="regras hidden" id="regras" target="_blank" rel="noopener">📋 Regras das provas</a>
   <nav>
     <button data-aba="ranking" class="ativo">Ranking</button>
     <button data-aba="baterias">Baterias</button>
@@ -154,6 +163,7 @@
 /* ======= CONFIGURAÇÃO ======= */
 const API_URL = 'https://script.google.com/macros/s/AKfycbwJbylWnumah7OoEetrUgNC_RFeRbXJn26zUwpQbtngDcPlj1-dVsMzuFiLiV8R5pGBGQ/exec'; // a MESMA URL do inscricao.html (termina em /exec)
 const ATUALIZAR_A_CADA = 30; // segundos
+const REGRAS_URL = ''; // link do Guia do Atleta no Drive (o mesmo da bio). Vazio = botão escondido.
 /* ============================ */
 
 const params = new URLSearchParams(location.search);
@@ -233,9 +243,20 @@ function renderRanking() {
         const pts = !x ? '&nbsp;' : x.movs ? x.pontos + ' pts' : x.pos + 'º · ' + x.pontos + ' pts';
         const movs = x && x.movs ? `<div class="movs">${x.movs.map(m => `<div>${esc(({ Deadlift: 'DL', Clean: 'CL', Thruster: 'TH', Total: 'TOT' })[m.nome] || m.nome.slice(0, 2).toUpperCase())} <b>${esc(m.exibir.replace(' kg', ''))}</b> · ${m.pos}º</div>`).join('')}</div>` : '';
         return `<div class="wod"><div class="t">WOD ${j + 1}</div><div class="s">${x ? esc(x.exibir) : '—'}</div><div class="p">${pts}</div>${movs}${rev ? '<span class="revisao">em revisão</span>' : ''}</div>`;
-      }).join('')}</div>
+      }).join('')}${cargasDupla(e)}</div>
     </div>`;
   }).join('')}</div>`;
+}
+
+// Dupla: tabela com a carga de cada atleta em cada movimento do WOD 1
+function cargasDupla(e) {
+  const w = e.wods[dados.wods[0].id];
+  if (!e.nomes || !w || !w.movs || !w.movs.some(m => m.atletas)) return '';
+  const cab = w.movs.map(m => `<th>${esc(m.nome === 'Total' ? 'Total' : m.nome)}</th>`).join('');
+  const linha = (nome, i) => `<tr><td>${esc(nome)}</td>${w.movs.map(m => `<td>${m.atletas ? m.atletas[i] : '—'}</td>`).join('')}</tr>`;
+  return `<div class="cargas"><div class="t">WOD 1 · carga de cada atleta (kg)</div>
+    <table><thead><tr><th></th>${cab}</tr></thead><tbody>${e.nomes.map(linha).join('')}
+    <tr class="soma"><td>Dupla</td>${w.movs.map(m => `<td>${esc(m.exibir.replace(' kg', ''))}</td>`).join('')}</tr></tbody></table></div>`;
 }
 
 /* ---------- Baterias ---------- */
@@ -381,6 +402,7 @@ $('lista').addEventListener('click', e => {
   l.classList.toggle('aberta');
 });
 
+if (REGRAS_URL) { $('regras').href = REGRAS_URL; $('regras').classList.remove('hidden'); }
 if (API_URL.startsWith('COLE')) {
   $('carregando').innerHTML = '<div class="vazio">Configure a API_URL no arquivo leaderboard.html.</div>';
 } else if (!ID_EVENTO) {
